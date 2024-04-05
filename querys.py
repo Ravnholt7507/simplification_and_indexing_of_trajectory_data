@@ -8,6 +8,7 @@ def time_query(start_time, end_time, tree):
     return result
 
 
+# recursive part of range query
 def _time_query_rec(start_time, end_time, node, result):
     if node.is_leaf:
         # print(node.children)
@@ -45,3 +46,49 @@ def _count_elements(node, counter):
         for element in node.children:
             counter = _count_elements(element, counter)
         return counter
+
+
+def range_query(coordinates, rtree):
+    result = []
+    result = _range_query(coordinates, rtree.root, result)
+    return result
+
+
+# recursion part of range_query
+def _range_query(coordinates, node, result):
+    if node.is_leaf:
+        for child in node.children:
+            mbr = [child.mbr["min"][0], child.mbr["min"][1], child.mbr["max"][0], child.mbr["max"][1]]
+            if intersection(coordinates, mbr):
+                for index, row in child.mbr["points"].iterrows():
+                    point = (row["latitude"], row["longitude"])
+                    if within(coordinates, point):
+                        print("i was here")
+                        result.append(row)
+    else:
+        for child in node.children:
+            mbr = [child.mbr["min"][0], child.mbr["min"][1], child.mbr["max"][0], child.mbr["max"][1]]
+            if intersection(coordinates, mbr):
+                _range_query(coordinates, child, result)
+
+    return result
+
+
+# using Seperating Axis Theorem
+def intersection(coordinates, mbr):
+    cor_x_min, cor_y_min, cor_x_max, cor_y_max = coordinates
+    mbr_x_min, mbr_y_min, mbr_x_max, mbr_y_max = mbr
+    return not (cor_x_max < mbr_x_min or
+                cor_x_min > mbr_x_max or 
+                cor_y_max < mbr_y_min or
+                cor_y_min > mbr_y_max)
+
+
+def within(coordinates, point):
+    cor_x_min, cor_y_min, cor_x_max, cor_y_max = coordinates
+    point_x, point_y = point 
+
+    if cor_x_min <= point_x and cor_y_min <= point_y and cor_x_max >= point_x and cor_y_max >= point_y:
+        return True
+    
+    return False

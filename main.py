@@ -2,7 +2,7 @@ import pandas as pd
 import math
 from compression_models import pmc_midrange
 from r_tree import Rtree, create_mbr
-from querys import time_query, count_elements
+from querys import time_query, count_elements, range_query
 
 
 # final test commit
@@ -31,11 +31,16 @@ def main():
 
     for child in rtree.root.children:
         rtree.root.find_leafs(child)
-    start_time = "2008-02-02 15:00:00"
-    end_time = "2008-02-03 15:36:10"
+
+    # examples of time queries
+    # start_time = "2008-02-02 15:00:00"
+    # end_time = "2008-02-03 15:36:10"
+
+    # example of query for range search
+    coordinates = [39.92123, 116.51172, 39.9213, 116.52]
 
     # return time_query(start_time, end_time, rtree)
-    return count_elements(rtree)
+    return range_query(coordinates, rtree)
 
 # call to check integrity of leaves
 def pretty_print(rtree):
