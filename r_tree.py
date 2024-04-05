@@ -29,7 +29,6 @@ class Node:
     
     @staticmethod
     def find_leafs(node):
-        print(len(node.children))
         if not node.children[0].children:
             node.is_leaf = True
         else:

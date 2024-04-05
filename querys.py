@@ -51,6 +51,12 @@ def _count_elements(node, counter):
 def range_query(coordinates, rtree):
     result = []
     result = _range_query(coordinates, rtree.root, result)
+    if not None:
+        print("The query returned ", len(result), " result(s)")
+        for element in result:
+            print("_________________________________")
+            print(element)
+            print("_________________________________")
     return result
 
 
@@ -63,7 +69,6 @@ def _range_query(coordinates, node, result):
                 for index, row in child.mbr["points"].iterrows():
                     point = (row["latitude"], row["longitude"])
                     if within(coordinates, point):
-                        print("i was here")
                         result.append(row)
     else:
         for child in node.children:

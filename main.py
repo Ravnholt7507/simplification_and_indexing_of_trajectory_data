@@ -5,7 +5,6 @@ from r_tree import Rtree, create_mbr
 from querys import time_query, count_elements, range_query
 
 
-# final test commit
 def main():
     mbr_points = 10
     df = pd.read_csv("release/taxi_log_2008_by_id/1.txt",
@@ -42,7 +41,7 @@ def main():
     # return time_query(start_time, end_time, rtree)
     return range_query(coordinates, rtree)
 
-# call to check integrity of leaves
+# call to check integrity of leafs
 def pretty_print(rtree):
     print("R-tree:")
     _pretty_print_rec(rtree.root)
@@ -50,7 +49,6 @@ def pretty_print(rtree):
 
 def _pretty_print_rec(node):
     if node.is_leaf:
-        print("len: ", len(node.children))
         for child in node.children:
             print('Leaf:', child.mbr)
     else:
@@ -59,4 +57,4 @@ def _pretty_print_rec(node):
             _pretty_print_rec(child)
 
 
-print(main())
+main()
