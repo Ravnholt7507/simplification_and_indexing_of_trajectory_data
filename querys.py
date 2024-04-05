@@ -27,12 +27,13 @@ def _time_query_rec(start_time, end_time, node, result):
     return result
 
 
+# use to count elements of leafs in rtree
 def count_elements(rtree):
     counter = 0
     counter = _count_elements(rtree.root, counter)
     return counter
 
-
+# recursive part of count elements
 def _count_elements(node, counter):
     if node.is_leaf:
         for child in node.children:
@@ -42,5 +43,5 @@ def _count_elements(node, counter):
         return counter
     else:
         for element in node.children:
-            counter += _count_elements(element, counter)
+            counter = _count_elements(element, counter)
         return counter

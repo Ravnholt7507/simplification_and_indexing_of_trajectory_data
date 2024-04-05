@@ -34,11 +34,10 @@ def main():
     start_time = "2008-02-02 15:00:00"
     end_time = "2008-02-03 15:36:10"
 
-    pretty_print(rtree)
+    # return time_query(start_time, end_time, rtree)
+    return count_elements(rtree)
 
-    return time_query(start_time, end_time, rtree)
-
-
+# call to check integrity of leaves
 def pretty_print(rtree):
     print("R-tree:")
     _pretty_print_rec(rtree.root)
