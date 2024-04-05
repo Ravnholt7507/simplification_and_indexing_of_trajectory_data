@@ -1,11 +1,12 @@
+import pandas as pd
 # error_bound er skal vaere i kilometer
 def create_mbr(df):
     min_lat = min(df["latitude"])
     max_lat = max(df["latitude"])
     min_lon = min(df["longitude"])
     max_lon = max(df["longitude"])
-    start_time = df["start_time"].iloc[0]
-    end_time = df["end_time"].iloc[-1]
+    start_time = min(df["start_time"])
+    end_time = max(df["end_time"])
 
     mbr = {
         "count": len(df),
@@ -32,7 +33,7 @@ class Rtree:
         self.max_children = max_children
 
     def insert(self, mbr):
-        self.insert_mbr(mbr, self. root)
+        self.insert_mbr(mbr, self.root)
 
     def insert_mbr(self, mbr, node):
         if node.is_leaf:
@@ -51,17 +52,21 @@ class Rtree:
                     self.insert_mbr(mbr, child)
                     node.mbr = self.expand_mbr(node.mbr, mbr)
                     return
-            self.insert_mbr(mbr, node.children[0])
-            node.mbr = self.expand_mbr(node.mbr, mbr)
+            if len(node.children) < self.max_children:
+                node.children.append(Node(is_leaf=False))
+                self.insert_mbr(mbr, node.children[-1])
+            else:       
+                self.split_node(node)
+                self.insert_mbr(mbr, node.children[-1])
+                node.mbr = self.expand_mbr(node.mbr, mbr)
 
     @staticmethod
     def split_node(node):
         node.is_leaf = False
         child_1 = Node()
-        child_2 = Node()
         child_1.mbr = node.mbr
         child_1.children = node.children
-        node.children = [child_1, child_2]
+        node.children = [child_1]
 
     @staticmethod
     def expand_mbr(mbr1, mbr2):
@@ -75,6 +80,8 @@ class Rtree:
 
         mbr1["min"] = (x_min, y_min)
         mbr1["max"] = (x_max, y_max)
-        mbr1["end"] = mbr2["end"]
+        mbr1["points"] = pd.concat([mbr1["points"], mbr2["points"]])
+        mbr1["start"] = min(mbr1["start"], mbr2["start"])
+        mbr1["end"] = max(mbr1["end"], mbr2["end"])
 
         return mbr1
