@@ -1,4 +1,3 @@
-from r_tree import Rtree
 from datetime import datetime
 
 
