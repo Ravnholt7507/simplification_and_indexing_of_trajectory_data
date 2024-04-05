@@ -26,7 +26,17 @@ class Node:
         self.is_leaf = is_leaf
         self.children = []
         self.mbr = mbr
-
+    
+    @staticmethod
+    def find_leafs(node):
+        print(len(node.children))
+        if not node.children[0].children:
+            node.is_leaf = True
+        else:
+            node.is_leaf = False
+            for child in node.children:
+                node.find_leafs(child)
+ 
 
 class Rtree:
     def __init__(self, max_children=5):
@@ -63,7 +73,7 @@ class Rtree:
     @staticmethod
     def split_node(node):
         node.is_leaf = False
-        child_1 = Node(mbr=node.mbr, is_leaf=False)
+        child_1 = Node(mbr=node.mbr)
         child_2 = Node(mbr=None)
         for element in node.children:
             child_1.children.append(element)

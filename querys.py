@@ -15,16 +15,16 @@ def _time_query_rec(start_time, end_time, node, result):
         # print(node.mbr)
         for child in node.children:
             if datetime.strptime(child.mbr["start"], '%Y-%m-%d %H:%M:%S') >= datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S'):
-                
+
                 for index, element in child.mbr["points"].iterrows():
-                    print("tested: ", element["end_time"])
-                    print("expected: ", end_time)
-                    if datetime.strptime(element["end_time"], '%Y-%m-%d %H:%M:%S') < datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S'):
+                    # print("tested: ", element["end_time"])
+                    # print("expected: ", end_time)
+                    if datetime.strptime(element["end_time"], '%Y-%m-%d %H:%M:%S') <= datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S'):
                         result.append(element)
     else:
         for child in node.children:
             if datetime.strptime(child.mbr["start"], '%Y-%m-%d %H:%M:%S') >= datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S'):
-                _time_query_rec(start_time, end_time, child, result)
+                result = _time_query_rec(start_time, end_time, child, result)
     return result
 
 

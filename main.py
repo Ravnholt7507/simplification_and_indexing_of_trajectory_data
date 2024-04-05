@@ -29,26 +29,30 @@ def main():
     for element in rectangles:
         rtree.insert(element)
 
+    for child in rtree.root.children:
+        rtree.root.find_leafs(child)
     start_time = "2008-02-02 15:00:00"
     end_time = "2008-02-03 15:36:10"
 
-    # pretty_print(rtree)
+    pretty_print(rtree)
 
     return time_query(start_time, end_time, rtree)
 
 
 def pretty_print(rtree):
     print("R-tree:")
-    _pretty_print_rec(rtree.root, 0)
+    _pretty_print_rec(rtree.root)
 
 
-def _pretty_print_rec(node, counter):
+def _pretty_print_rec(node):
     if node.is_leaf:
-        print('Leaf:', len(node.children))
+        print("len: ", len(node.children))
+        for child in node.children:
+            print('Leaf:', child.mbr)
     else:
         print('Internal Node:', len(node.children))
         for child in node.children:
-            _pretty_print_rec(child, counter+1)
+            _pretty_print_rec(child)
 
 
 print(main())
