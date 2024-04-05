@@ -2,7 +2,8 @@ import pandas as pd
 import math
 from compression_models import pmc_midrange
 from r_tree import Rtree, create_mbr
-from querys import time_query
+from querys import time_query, count_elements
+
 
 # final test commit
 def main():
@@ -28,10 +29,10 @@ def main():
     for element in rectangles:
         rtree.insert(element)
 
-    start_time = "2008-02-02 15:36:08"
+    start_time = "2008-02-02 15:00:00"
     end_time = "2008-02-03 15:36:10"
 
-    pretty_print(rtree)
+    # pretty_print(rtree)
 
     return time_query(start_time, end_time, rtree)
 
@@ -40,14 +41,13 @@ def pretty_print(rtree):
     print("R-tree:")
     _pretty_print_rec(rtree.root, 0)
 
-    
+
 def _pretty_print_rec(node, counter):
     if node.is_leaf:
-        print('Leaf:', type(node.children[0]))
+        print('Leaf:', len(node.children))
     else:
-        print('Internal Node:', node)
+        print('Internal Node:', len(node.children))
         for child in node.children:
-            print('Child:', counter)
             _pretty_print_rec(child, counter+1)
 
 

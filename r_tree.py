@@ -1,4 +1,6 @@
-import pandas as pd
+from datetime import datetime
+
+
 # error_bound er skal vaere i kilometer
 def create_mbr(df):
     min_lat = min(df["latitude"])
@@ -16,20 +18,19 @@ def create_mbr(df):
         "start": start_time,
         "end": end_time
     }
-
     return mbr
 
 
 class Node:
-    def __init__(self, is_leaf=True):
+    def __init__(self, mbr, is_leaf=True):
         self.is_leaf = is_leaf
         self.children = []
-        self.mbr = None
+        self.mbr = mbr
 
 
 class Rtree:
     def __init__(self, max_children=5):
-        self.root = Node()
+        self.root = Node(mbr=None)
         self.max_children = max_children
 
     def insert(self, mbr):
@@ -38,7 +39,7 @@ class Rtree:
     def insert_mbr(self, mbr, node):
         if node.is_leaf:
             if len(node.children) < self.max_children:
-                node.children.append(mbr)
+                node.children.append(Node(mbr=mbr))
                 if node.mbr is None:
                     node.mbr = mbr
                 else:
@@ -53,20 +54,20 @@ class Rtree:
                     node.mbr = self.expand_mbr(node.mbr, mbr)
                     return
             if len(node.children) < self.max_children:
-                node.children.append(Node(is_leaf=False))
+                node.children.append(Node(mbr=mbr))
                 self.insert_mbr(mbr, node.children[-1])
-            else:       
+            else:
                 self.split_node(node)
-                self.insert_mbr(mbr, node.children[-1])
-                node.mbr = self.expand_mbr(node.mbr, mbr)
+                self.insert_mbr(mbr, node)
 
     @staticmethod
     def split_node(node):
         node.is_leaf = False
-        child_1 = Node()
-        child_1.mbr = node.mbr
-        child_1.children = node.children
-        node.children = [child_1]
+        child_1 = Node(mbr=node.mbr, is_leaf=False)
+        child_2 = Node(mbr=None)
+        for element in node.children:
+            child_1.children.append(element)
+        node.children = [child_1, child_2]
 
     @staticmethod
     def expand_mbr(mbr1, mbr2):
@@ -80,8 +81,9 @@ class Rtree:
 
         mbr1["min"] = (x_min, y_min)
         mbr1["max"] = (x_max, y_max)
-        mbr1["points"] = pd.concat([mbr1["points"], mbr2["points"]])
-        mbr1["start"] = min(mbr1["start"], mbr2["start"])
-        mbr1["end"] = max(mbr1["end"], mbr2["end"])
+        if datetime.strptime(mbr1["start"], '%Y-%m-%d %H:%M:%S') > datetime.strptime(mbr2["start"], '%Y-%m-%d %H:%M:%S'):
+            mbr1["start"] = mbr2["start"]
+        if datetime.strptime(mbr1["end"], '%Y-%m-%d %H:%M:%S') < datetime.strptime(mbr2["end"], '%Y-%m-%d %H:%M:%S'):
+            mbr1["end"] = mbr2["end"]
 
         return mbr1
