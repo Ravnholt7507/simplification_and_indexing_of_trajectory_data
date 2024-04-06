@@ -2,7 +2,8 @@ import pandas as pd
 import math
 from compression_models import pmc_midrange
 from r_tree import Rtree, create_mbr
-from querys import time_query, count_elements, range_query
+from queries import time_query, count_elements, range_query
+import time
 
 
 def main():
@@ -37,9 +38,15 @@ def main():
 
     # example of query for range search
     coordinates = [39.92123, 116.51172, 39.9213, 116.52]
+    
+    start = time.time()
+    results = range_query(coordinates, rtree)
+    # results = time_query(start_time, end_time, rtree)
+    end = time.time()
+    
+    print("Query took ", end - start, " seconds to execute.")
 
-    # return time_query(start_time, end_time, rtree)
-    return range_query(coordinates, rtree)
+    return results
 
 # call to check integrity of leafs
 def pretty_print(rtree):
