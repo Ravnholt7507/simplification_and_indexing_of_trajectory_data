@@ -1,6 +1,6 @@
 from haversine import haversine
 import pandas as pd
-
+pd.options.mode.chained_assignment = None
 
 def pmc_midrange(df, error_bound):
     current_lat = df["latitude"].iloc[0]

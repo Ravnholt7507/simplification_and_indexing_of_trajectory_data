@@ -84,16 +84,16 @@ def intersection(coordinates, mbr):
     cor_x_min, cor_y_min, cor_x_max, cor_y_max = coordinates
     mbr_x_min, mbr_y_min, mbr_x_max, mbr_y_max = mbr
     return not (cor_x_max < mbr_x_min or
-                cor_x_min > mbr_x_max or 
+                cor_x_min > mbr_x_max or
                 cor_y_max < mbr_y_min or
                 cor_y_min > mbr_y_max)
 
 
 def within(coordinates, point):
     cor_x_min, cor_y_min, cor_x_max, cor_y_max = coordinates
-    point_x, point_y = point 
+    point_x, point_y = point
 
     if cor_x_min <= point_x and cor_y_min <= point_y and cor_x_max >= point_x and cor_y_max >= point_y:
         return True
-    
+
     return False

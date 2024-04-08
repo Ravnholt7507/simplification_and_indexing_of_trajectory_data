@@ -1,9 +1,9 @@
 import pandas as pd
-import math
 from compression_models import pmc_midrange
-from r_tree import Rtree, create_mbr
+from r_tree import init_rtree, make_all_mbrs, create_mbr
 from queries import time_query, count_elements, range_query
 import time
+from benchmarks import range_query_no_compression_no_indexing
 
 
 def main():
@@ -13,38 +13,44 @@ def main():
                      names=["taxi_id", "datetime", "longitude", "latitude"])
 
     final_df = pmc_midrange(df, 0.02)
-    rest: int = len(final_df) % mbr_points
-    loops: int = math.floor(len(final_df)/mbr_points)
-    i: int = 0
-    rectangles = []
 
-    while i < loops:
-        rectangles.append(create_mbr(final_df.head(mbr_points)))
-        final_df = final_df.iloc[mbr_points:]
-        i += 1
-    if rest != 0:
-        rectangles.append(create_mbr(final_df))
+    # r_tree with compression
+    rectangles = make_all_mbrs(final_df, mbr_points)
 
-    rtree = Rtree()
-    for element in rectangles:
-        rtree.insert(element)
+    rtree = init_rtree(rectangles)
 
-    for child in rtree.root.children:
-        rtree.root.find_leafs(child)
+    # r_tree without compression
+    rectangles = make_all_mbrs(df, mbr_points)
 
+    no_comp_rtree = init_rtree(rectangles)
     # examples of time queries
     # start_time = "2008-02-02 15:00:00"
     # end_time = "2008-02-03 15:36:10"
 
     # example of query for range search
     coordinates = [39.92123, 116.51172, 39.9213, 116.52]
-    
+
+    print("WITH PMC-COMPRESSION AND WITH R-TREE INDEXING:")
+
     start = time.time()
     results = range_query(coordinates, rtree)
     # results = time_query(start_time, end_time, rtree)
     end = time.time()
-    
-    print("Query took ", end - start, " seconds to execute.")
+
+    print("Query with PMC-midrange compression and r-tree indexing took ", end - start, " seconds to execute.")
+    print("\nWITHOUT PMC-COMPRESSION AND WITH R-TREE INDEXING")
+    start = time.time()
+    results = range_query(coordinates, no_comp_rtree)
+    end = time.time()
+    print("Query without PMC-midrange compression and with r-tree indexing took ", end - start, " seconds to execute.")
+
+    print("\nWITHOUT PMC-COMPRESSION AND WITHOUT R-TREE INDEXING:")
+
+    start = time.time()
+    bench_results = range_query_no_compression_no_indexing(coordinates, df)
+    end = time.time()
+    print(bench_results)
+    print("Query without compression and r-tree indexing took ", end - start, "seconds to execute.")
 
     return results
 

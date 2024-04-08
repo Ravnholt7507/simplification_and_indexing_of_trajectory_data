@@ -1,8 +1,28 @@
 from datetime import datetime
+import math
 
+def make_all_mbrs(df, max_points):
+
+    rest: int = len(df) % max_points
+    loops: int = math.floor(len(df)/max_points)
+    i: int = 0
+    rectangles = []
+
+    while i < loops:
+        rectangles.append(create_mbr(df.head(max_points)))
+        df = df.iloc[max_points:]
+        i += 1
+    if rest != 0:
+        rectangles.append(create_mbr(df))
+    return rectangles
 
 # error_bound er skal vaere i kilometer
 def create_mbr(df):
+    if 'datetime' in df:
+        for index, row in df.iterrows():
+            df.loc[index, "start_time"] = df.loc[index, "datetime"]
+            df.loc[index, "end_time"] = df.loc[index, "datetime"]
+    
     min_lat = min(df["latitude"])
     max_lat = max(df["latitude"])
     min_lon = min(df["longitude"])
@@ -21,12 +41,23 @@ def create_mbr(df):
     return mbr
 
 
+def init_rtree(rectangles):
+    rtree = Rtree()
+    for element in rectangles:
+        rtree.insert(element)
+
+    for child in rtree.root.children:
+        rtree.root.find_leafs(child)
+
+    return rtree
+
+
 class Node:
     def __init__(self, mbr, is_leaf=True):
         self.is_leaf = is_leaf
         self.children = []
         self.mbr = mbr
-    
+
     @staticmethod
     def find_leafs(node):
         if not node.children[0].children:
@@ -35,7 +66,7 @@ class Node:
             node.is_leaf = False
             for child in node.children:
                 node.find_leafs(child)
- 
+
 
 class Rtree:
     def __init__(self, max_children=5):
