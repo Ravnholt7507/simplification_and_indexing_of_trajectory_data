@@ -6,4 +6,5 @@ def range_query_no_compression_no_indexing(coordinates, points):
         point = (row["latitude"], row["longitude"])
         if within(coordinates, point):
             results.append(row)
+    print("The query returned ", len(results), "result(s)")
     return results

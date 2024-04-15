@@ -1,9 +1,10 @@
 import pandas as pd
 from compression_models import pmc_midrange
-from r_tree import init_rtree, make_all_mbrs, create_mbr
+from r_tree import init_rtree, make_all_mbrs
 from queries import time_query, count_elements, range_query
 import time
 from benchmarks import range_query_no_compression_no_indexing
+from ui import plot_query
 
 
 def main():
@@ -11,6 +12,9 @@ def main():
     df = pd.read_csv("release/taxi_log_2008_by_id/1.txt",
                      sep=",",
                      names=["taxi_id", "datetime", "longitude", "latitude"])
+
+    coordinates = [39, 116, 40, 117]
+    # plot_query(df["longitude"], df["latitude"], coordinates)
 
     final_df = pmc_midrange(df, 0.02)
 
@@ -28,7 +32,6 @@ def main():
     # end_time = "2008-02-03 15:36:10"
 
     # example of query for range search
-    coordinates = [39.92123, 116.51172, 39.9213, 116.52]
 
     print("WITH PMC-COMPRESSION AND WITH R-TREE INDEXING:")
 
@@ -49,7 +52,6 @@ def main():
     start = time.time()
     bench_results = range_query_no_compression_no_indexing(coordinates, df)
     end = time.time()
-    print(bench_results)
     print("Query without compression and r-tree indexing took ", end - start, "seconds to execute.")
 
     return results

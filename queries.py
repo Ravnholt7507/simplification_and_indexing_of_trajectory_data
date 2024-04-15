@@ -53,10 +53,12 @@ def range_query(coordinates, rtree):
     result = _range_query(coordinates, rtree.root, result)
     if not None:
         print("The query returned ", len(result), " result(s)")
+        """
         for element in result:
             print("_________________________________")
             print(element)
             print("_________________________________")
+        """
     return result
 
 

@@ -1,5 +1,6 @@
 from datetime import datetime
 import math
+import pandas as pd
 
 def make_all_mbrs(df, max_points):
 
@@ -118,7 +119,6 @@ class Rtree:
         y_min = min(y_min1, y_min2)
         x_max = max(x_max1, x_max2)
         y_max = max(y_max1, y_max2)
-
         mbr1["min"] = (x_min, y_min)
         mbr1["max"] = (x_max, y_max)
         if datetime.strptime(mbr1["start"], '%Y-%m-%d %H:%M:%S') > datetime.strptime(mbr2["start"], '%Y-%m-%d %H:%M:%S'):
