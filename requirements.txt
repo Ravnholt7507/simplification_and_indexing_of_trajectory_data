@@ -2,3 +2,4 @@ pandas
 haversine
 datetime
 matplotlib
+torch
