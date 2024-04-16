@@ -1,8 +1,8 @@
 import os
 import pandas as pd
 
-def load_single_file(filepath, names, usecols, skiprows=1):
-    return pd.read_csv(filepath, names=names, usecols=usecols, skiprows=skiprows)
+def load_single_file(filepath, names, skiprows=1):
+    return pd.read_csv(filepath, names=names, skiprows=skiprows)
 
 def load_bulk(folderpath, names, amount=1, skiprows=1):
     filelist = os.listdir(folderpath)

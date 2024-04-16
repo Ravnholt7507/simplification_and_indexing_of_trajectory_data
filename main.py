@@ -1,4 +1,5 @@
 import pandas as pd
+from dataloader import load_single_file, load_bulk
 from compression_models import pmc_midrange
 from r_tree import init_rtree, make_all_mbrs
 from queries import time_query, count_elements, range_query
