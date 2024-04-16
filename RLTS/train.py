@@ -5,7 +5,7 @@ from torch.distributions import Categorical
 import torch.nn as nn
 import torch.nn.functional as F
 
-def train(env, policy_network, episodes, initial_epsilon=0.9, epsilon_decay=0.995, min_epsilon=0.01, discount_factor=0.99):
+def train(env, policy_network, episodes=10, initial_epsilon=0.9, epsilon_decay=0.995, min_epsilon=0.01, discount_factor=0.99):
     optimizer = torch.optim.Adam(policy_network.parameters(), lr=0.001)
     epsilon = initial_epsilon
 

@@ -21,11 +21,11 @@ def main():
                      names=["taxi_id", "datetime", "longitude", "latitude"])
     
     env = TrajectoryEnv(df)
-    policy_network = PolicyNetwork(input_size=env.k, hidden_size=20, output_size=env.k)
+    policy_network = PolicyNetwork(input_size=env.k, hidden_size=15, output_size=env.k)
+    train(env, policy_network, 1) # resultate bliver lagt i RLTS/models/test_model som bliver hentet på næste linje
     policy_network.load_state_dict(torch.load("RLTS/models/test_model"))
     policy_network.eval()
     simplify(df, policy_network, env)
-
 
     final_df = pmc_midrange(df, 0.02)
 
