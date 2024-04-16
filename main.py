@@ -13,8 +13,6 @@ def main():
                      sep=",",
                      names=["taxi_id", "datetime", "longitude", "latitude"])
 
-    coordinates = [39, 116, 40, 117]
-    # plot_query(df["longitude"], df["latitude"], coordinates)
 
     final_df = pmc_midrange(df, 0.02)
 
@@ -33,6 +31,7 @@ def main():
 
     # example of query for range search
 
+    coordinates = [39.9, 116.4, 39.95, 116.6]
     print("WITH PMC-COMPRESSION AND WITH R-TREE INDEXING:")
 
     start = time.time()
@@ -54,6 +53,7 @@ def main():
     end = time.time()
     print("Query without compression and r-tree indexing took ", end - start, "seconds to execute.")
 
+    plot_query(df["longitude"], df["latitude"], coordinates)
     return results
 
 # call to check integrity of leafs

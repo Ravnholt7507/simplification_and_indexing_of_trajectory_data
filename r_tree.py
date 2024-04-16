@@ -23,7 +23,7 @@ def create_mbr(df):
         for index, row in df.iterrows():
             df.loc[index, "start_time"] = df.loc[index, "datetime"]
             df.loc[index, "end_time"] = df.loc[index, "datetime"]
-    
+
     min_lat = min(df["latitude"])
     max_lat = max(df["latitude"])
     min_lon = min(df["longitude"])
