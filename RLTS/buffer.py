@@ -27,7 +27,6 @@ class TrajectoryEnv:
     def update_values(self, idx):
         self.buffer.reset_index(drop=True, inplace=True)
 
-        print("index: ", idx)
         if idx < 1 or idx > self.buffer_size-1:
             print("Warning: wrong index given")
 
@@ -65,7 +64,6 @@ class TrajectoryEnv:
             next_point = self.original_trajectory.iloc[self.current_index] # skal scannes som 0,0
             current_point = self.original_trajectory.iloc[self.current_index-1] #skal have ny værdi
             prev_point = self.original_trajectory.iloc[self.current_index-2]  #tidligere sidste værdi
-         #   print("POINT", current_point)
 
             self.buffer.at[self.buffer_size, 'value'] = self.ped(current_point, next_point, prev_point)
             self.buffer = self.buffer.reset_index(drop=True)
