@@ -59,9 +59,7 @@ def train(env, policy_network, episodes, initial_epsilon=0.9, epsilon_decay=0.99
                 accumulative_rewards.append(normalized)
 
         rewards = accumulative_rewards
-        # print(rewards)
 
-        # Update policy
         rewards_tensor = torch.tensor(rewards, dtype=torch.float)
         policy_loss = torch.cat([-log_prob * reward for log_prob, reward in zip(log_probs, rewards_tensor)]).sum()
 
