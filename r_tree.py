@@ -70,7 +70,7 @@ class Rtree:
             if len(node.children) < self.max_children:
                 node.children.append(Node(mbr=mbr))
                 if node.mbr is None:
-                    node.mbr = mbr
+                    node.mbr = mbr.copy()
                 else:
                     node.mbr = self.expand_mbr(node.mbr, mbr)
             else:
@@ -110,7 +110,7 @@ class Rtree:
         y_max = max(y_max1, y_max2)
         mbr1["min"] = (x_min, y_min)
         mbr1["max"] = (x_max, y_max)
-        # mbr1["points"] = pd.concat([mbr1["points"], mbr2["points"]])
+        mbr1["points"] = pd.concat([mbr1["points"], mbr2["points"]])
         if datetime.strptime(mbr1["start"], '%Y-%m-%d %H:%M:%S') > datetime.strptime(mbr2["start"], '%Y-%m-%d %H:%M:%S'):
             mbr1["start"] = mbr2["start"]
         if datetime.strptime(mbr1["end"], '%Y-%m-%d %H:%M:%S') < datetime.strptime(mbr2["end"], '%Y-%m-%d %H:%M:%S'):

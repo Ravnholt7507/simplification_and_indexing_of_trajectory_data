@@ -75,7 +75,9 @@ def _range_query(coordinates, node, result):
     else:
         for child in node.children:
             mbr = [child.mbr["min"][0], child.mbr["min"][1], child.mbr["max"][0], child.mbr["max"][1]]
-            if intersection(coordinates, mbr):
+            if mbr_within(coordinates, mbr):
+                result.append(child.mbr["points"])
+            elif intersection(coordinates, mbr):
                 _range_query(coordinates, child, result)
 
     return result
@@ -89,6 +91,11 @@ def intersection(coordinates, mbr):
                 cor_x_min > mbr_x_max or
                 cor_y_max < mbr_y_min or
                 cor_y_min > mbr_y_max)
+
+
+def mbr_within(coordinates, mbr):
+    mbr_x_min, mbr_y_min, mbr_x_max, mbr_y_max = mbr
+    return (within(coordinates, (mbr_x_min, mbr_y_min)) and within(coordinates, (mbr_x_max, mbr_y_max)))
 
 
 def within(coordinates, point):

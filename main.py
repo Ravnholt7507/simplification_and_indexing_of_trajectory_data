@@ -1,4 +1,6 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import torch
 from dataloader import load_single_file, load_bulk
 from compression_models import pmc_midrange
@@ -10,7 +12,7 @@ from RLTS.train import train
 from RLTS.policy import PolicyNetwork
 from RLTS.buffer import TrajectoryEnv
 from benchmarks import range_query_no_compression_no_indexing
-from ui import plot_query
+from ui import plot_query, plot_mbrs
 
 
 def main():
@@ -19,13 +21,14 @@ def main():
     df = pd.read_csv("release/taxi_log_2008_by_id/1.txt",
                      sep=",",
                      names=["taxi_id", "datetime", "longitude", "latitude"])
-    
+    """    
     env = TrajectoryEnv(df)
     policy_network = PolicyNetwork(input_size=env.k, hidden_size=15, output_size=env.k)
     train(env, policy_network, 1) # resultate bliver lagt i RLTS/models/test_model som bliver hentet på næste linje
     policy_network.load_state_dict(torch.load("RLTS/models/test_model"))
     policy_network.eval()
     simplify(df, policy_network, env)
+    """
 
     final_df = pmc_midrange(df, 0.02)
 
@@ -45,6 +48,7 @@ def main():
     
     # example of query for range search
     coordinates = [39.9, 116.4, 39.95, 116.6]
+    # coordinates = [39.5, 116, 40, 117]
     print("WITH PMC-COMPRESSION AND WITH R-TREE INDEXING:")
     start = time.time()
     results = range_query(coordinates, rtree)
@@ -69,24 +73,7 @@ def main():
     # end = time.time()
     # print("Query without compression and r-tree indexing took ", end - start, "seconds to execute.")
 
-
-    plot_query(df["longitude"], df["latitude"], coordinates)
-    return print(True)
-
-# call to check integrity of leafs
-def pretty_print(rtree):
-    print("R-tree:")
-    _pretty_print_rec(rtree.root)
-
-
-def _pretty_print_rec(node):
-    if node.is_leaf:
-        for child in node.children:
-            print('Leaf:', child.mbr)
-    else:
-        print('Internal Node:', len(node.children))
-        for child in node.children:
-            _pretty_print_rec(child)
-
+    plot_mbrs(df["longitude"], df["latitude"], rtree)
+    #plot_query(df["longitude"], df["latitude"], coordinates)
 
 main()
