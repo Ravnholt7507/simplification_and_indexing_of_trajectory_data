@@ -1,3 +1,4 @@
 release/
 .flake8
 __pycache__/
+.idea/

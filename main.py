@@ -28,15 +28,14 @@ def main():
     # examples of time queries
     # start_time = "2008-02-02 15:00:00"
     # end_time = "2008-02-03 15:36:10"
-
+    # results = time_query(start_time, end_time, rtree)
+    
     # example of query for range search
-
     coordinates = [39.9, 116.4, 39.95, 116.6]
     print("WITH PMC-COMPRESSION AND WITH R-TREE INDEXING:")
 
     start = time.time()
     results = range_query(coordinates, rtree)
-    # results = time_query(start_time, end_time, rtree)
     end = time.time()
 
     print("Query with PMC-midrange compression and r-tree indexing took ", end - start, " seconds to execute.")
@@ -52,9 +51,8 @@ def main():
     bench_results = range_query_no_compression_no_indexing(coordinates, df)
     end = time.time()
     print("Query without compression and r-tree indexing took ", end - start, "seconds to execute.")
-
     plot_query(df["longitude"], df["latitude"], coordinates)
-    return results
+    return print(True)
 
 # call to check integrity of leafs
 def pretty_print(rtree):

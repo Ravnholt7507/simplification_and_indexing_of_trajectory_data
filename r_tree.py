@@ -47,9 +47,6 @@ def init_rtree(rectangles):
     for element in rectangles:
         rtree.insert(element)
 
-    for child in rtree.root.children:
-        rtree.root.find_leafs(child)
-
     return rtree
 
 
@@ -58,15 +55,6 @@ class Node:
         self.is_leaf = is_leaf
         self.children = []
         self.mbr = mbr
-
-    @staticmethod
-    def find_leafs(node):
-        if not node.children[0].children:
-            node.is_leaf = True
-        else:
-            node.is_leaf = False
-            for child in node.children:
-                node.find_leafs(child)
 
 
 class Rtree:
@@ -95,7 +83,8 @@ class Rtree:
                     node.mbr = self.expand_mbr(node.mbr, mbr)
                     return
             if len(node.children) < self.max_children:
-                node.children.append(Node(mbr=mbr))
+                node.children.append(Node(mbr=None))
+                node.mbr = self.expand_mbr(node.mbr, mbr)
                 self.insert_mbr(mbr, node.children[-1])
             else:
                 self.split_node(node)
@@ -103,12 +92,12 @@ class Rtree:
 
     @staticmethod
     def split_node(node):
-        node.is_leaf = False
         child_1 = Node(mbr=node.mbr)
-        child_2 = Node(mbr=None)
+        child_1.is_leaf = node.is_leaf
+        node.is_leaf = False
         for element in node.children:
             child_1.children.append(element)
-        node.children = [child_1, child_2]
+        node.children = [child_1]
 
     @staticmethod
     def expand_mbr(mbr1, mbr2):
@@ -121,6 +110,7 @@ class Rtree:
         y_max = max(y_max1, y_max2)
         mbr1["min"] = (x_min, y_min)
         mbr1["max"] = (x_max, y_max)
+        # mbr1["points"] = pd.concat([mbr1["points"], mbr2["points"]])
         if datetime.strptime(mbr1["start"], '%Y-%m-%d %H:%M:%S') > datetime.strptime(mbr2["start"], '%Y-%m-%d %H:%M:%S'):
             mbr1["start"] = mbr2["start"]
         if datetime.strptime(mbr1["end"], '%Y-%m-%d %H:%M:%S') < datetime.strptime(mbr2["end"], '%Y-%m-%d %H:%M:%S'):
