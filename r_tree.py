@@ -42,7 +42,8 @@ def create_mbr(df):
     return mbr
 
 
-def init_rtree(rectangles):
+def init_rtree(df, mbr_points):
+    rectangles = make_all_mbrs(df, mbr_points)
     rtree = Rtree()
     for element in rectangles:
         rtree.insert(element)
