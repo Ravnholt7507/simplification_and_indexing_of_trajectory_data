@@ -4,11 +4,8 @@ import torch
 from torch.distributions import Categorical
 import torch.nn as nn
 import torch.nn.functional as F
-from buffer import TrajectoryEnv
-from policy import PolicyNetwork
 
-
-def train(env, policy_network, episodes, initial_epsilon=0.9, epsilon_decay=0.995, min_epsilon=0.01, discount_factor=0.99):
+def train(env, policy_network, episodes=10, initial_epsilon=0.9, epsilon_decay=0.995, min_epsilon=0.01, discount_factor=0.99):
     optimizer = torch.optim.Adam(policy_network.parameters(), lr=0.001)
     epsilon = initial_epsilon
 
@@ -69,15 +66,4 @@ def train(env, policy_network, episodes, initial_epsilon=0.9, epsilon_decay=0.99
 
         if episode % 100 == 0:
             print(f"Episode {episode}, Total Reward: {sum(rewards)}, Loss: {policy_loss.item()}")
-
-# Example DataFrame
-data = {
-    'latitude': [1, 1, 1.5, 3, 3, 3, 4, 5, 6, 7],
-    'longitude': [1, 2, 3, 4, 4, 4, 3, 3.5, 3, 4]
-}
-df = pd.DataFrame(data)
-df['index'] = df.index
-
-env = TrajectoryEnv(df)
-policy_network = PolicyNetwork(input_size=env.k, hidden_size=20, output_size=env.k)
-train(env, policy_network, 400)
+        torch.save(policy_network.state_dict(), "RLTS/models/test_model")
