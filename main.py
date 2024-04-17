@@ -25,6 +25,7 @@ def main():
     policy_network.load_state_dict(torch.load("RLTS/models/test_model"))
     policy_network.eval()
     simplify(df, policy_network, env)
+    
     """
 
     final_df = pmc_midrange(df, 0.02)
