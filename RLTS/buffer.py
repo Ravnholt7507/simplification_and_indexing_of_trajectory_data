@@ -1,14 +1,15 @@
-import numpy as np
 import pandas as pd
+import numpy as np
 
 class TrajectoryEnv:
-    def __init__(self, df, buffer_size=8):
+    def __init__(self, df, buffer_size=4):
         self.buffer_size = buffer_size
         self.k = 3
-        self.buffer = pd.DataFrame(columns=['latitude', 'longitude', 'value'])
+        self.buffer = pd.DataFrame(columns=['latitude', 'longitude', 'value', 'index'])
         self.current_index = 0
+        self.acc_reward = 0
         self.trajectory_error = 0
-        self.original_trajectory = df.assign(value=0.0)
+        self.original_trajectory = df.assign(value=0.0, index=df.index)
 
     def calculate_simplification_error(self):
         return self.trajectory_error
@@ -17,6 +18,36 @@ class TrajectoryEnv:
         original_points = len(self.original_trajectory)
         simplified_points = len(self.buffer)
         return original_points / simplified_points
+
+    def calculate_overall_error(self):
+        max_overall_error = 0
+        for i in range(len(self.buffer) - 1):
+            segment_start = self.buffer.iloc[i]
+            segment_end = self.buffer.iloc[i + 1]
+            segment_errors = []
+            max_segment_error = 0
+            for j in range(segment_start['index'].astype(int), segment_end['index'].astype(int)):
+                point = self.original_trajectory.iloc[j]
+                distance = self.ped(point, segment_start, segment_end)
+                segment_errors.append(distance)
+                max_segment_error = max(distance, max_segment_error)
+            max_overall_error += max_segment_error
+        return max_overall_error
+
+    def calculate_maximum_error(self):
+        max_overall_error = 0
+        for i in range(len(self.buffer) - 1):
+            segment_start = self.buffer.iloc[i]
+            segment_end = self.buffer.iloc[i + 1]
+            segment_errors = []
+            max_segment_error = 0
+            for j in range(segment_start['index'].astype(int), segment_end['index'].astype(int)):
+                point = self.original_trajectory.iloc[j]
+                distance = self.ped(point, segment_start, segment_end)
+                segment_errors.append(distance)
+                max_segment_error = max(distance, max_segment_error)
+            max_overall_error = max(max_overall_error, max_segment_error)
+        return max_overall_error
 
     def ped(self, current, next_point, prev_point):
         point, next_point, prev_point = current[['latitude', 'longitude']], next_point[['latitude', 'longitude']], prev_point[['latitude', 'longitude']]
@@ -41,7 +72,7 @@ class TrajectoryEnv:
         else:
             self.buffer.at[idx-1, 'value'] = 0
 
-        if (idx+1) != self.buffer_size + 1:
+        if (idx+1) != self.buffer_size + 1 and (min(idx + 2, len(self.buffer)-1) != min(idx + 1, len(self.buffer) - 1)):
             self.buffer.at[idx+1, 'value'] = max(self.ped(next_point, next_next_point, prev_point), self.ped(point, next_next_point, prev_point))
         else:
             self.buffer.at[idx+1, 'value'] = 0
@@ -57,7 +88,6 @@ class TrajectoryEnv:
 
     def step(self, action):
         done = False
-        error_before = self.trajectory_error
         state, indices = self.get_state()
 
         if self.current_index < len(self.original_trajectory):
@@ -75,12 +105,10 @@ class TrajectoryEnv:
 
         index_to_drop = indices[action]
         self.update_values(index_to_drop)
-        dropped_point = self.buffer['value'].iloc[index_to_drop]
         self.buffer = self.buffer.drop(index_to_drop)
         self.buffer = self.buffer.reset_index(drop=True)
 
-        self.trajectory_error = max(self.trajectory_error, dropped_point)
-
+        self.trajectory_error = self.calculate_maximum_error()
         reward = -self.trajectory_error
 
         self.current_index += 1
