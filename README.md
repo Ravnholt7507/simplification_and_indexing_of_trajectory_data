@@ -1,5 +1,5 @@
 # INSTALLATION:
-Simply clone the project and run `pip install -r requirements`
+Simply clone the project and run `pip install -r requirements.txt`
 
 # USAGE:
 ## Initializing r-tree:
@@ -11,8 +11,8 @@ points_in_mbr = 10 #define how many points there should be in the leaf nodes
 
 rtree = init_rtree(dataframe, points_in_mbr)
 ```
-### Plotting your rtree:
-This is usefull to see if you should add more or less points in each mbr
+### Plotting your r-tree:
+This is useful to see if you should add more or less points in each MBR
 ```
 plot_mbrs(longitudes, latitudes, rtree)
 ```
