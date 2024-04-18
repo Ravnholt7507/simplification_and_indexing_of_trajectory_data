@@ -10,8 +10,8 @@ def interpolate_point(p1, p2, p3):
     Returns a tuple (x, y) representing the interpolated point.
     """
     # Calculate total time difference and the proportion for p3
-    total_time = (p2[2] - p1[2]).total_seconds()
-    time_proportion = (p3[2] - p1[2]).total_seconds() / total_time if total_time != 0 else 0
+    total_time = (datetime.strptime(p2[2], '%Y-%m-%d %H:%M:%S') - datetime.strptime(p1[2], '%Y-%m-%d %H:%M:%S')).total_seconds()
+    time_proportion = (datetime.strptime(p3[2], '%Y-%m-%d %H:%M:%S') - datetime.strptime(p1[2], '%Y-%m-%d %H:%M:%S')).total_seconds() / total_time if total_time != 0 else 0
 
     # Linear interpolation for x and y coordinates
     x = p1[0] + (p2[0] - p1[0]) * time_proportion

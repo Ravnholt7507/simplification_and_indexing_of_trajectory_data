@@ -1,4 +1,4 @@
-from error import interpolate_point, euclidean_distance, sed
+from DOTS.error import interpolate_point, euclidean_distance, sed
 
 class Node:
     def __init__(self, identifier, x, y, time, parent=None):
@@ -24,10 +24,10 @@ class LayeredDAG:
     def display(self):
         """Prints the graph layers for visualization, including parent ID for each node."""
         for i, layer in enumerate(self.layers, start=1):
-            print(f"Layer {i}:")
+            #print(f"Layer {i}:")
             for node in layer:
                 parent_id = 'None' if node.parent is None else node.parent.identifier
-                print(f"  Node {node.identifier} ({node.x}, {node.y}, {node.time}) - Parent ID: {parent_id}")
+                #print(f"  Node {node.identifier} ({node.x}, {node.y}, {node.time}) - Parent ID: {parent_id}")
 
     def add_trajectory_data(self, data_points, threshold, error_multiplier=1.5):
         """Adds trajectory data points to the DAG using the DOTS algorithm."""
@@ -64,20 +64,20 @@ class LayeredDAG:
                                 (point_j[1], point_j[2], point_j[3]),
                                 (intermediate_point[1], intermediate_point[2], intermediate_point[3]))**2
                     total_error += error
-                print(f"Comparing {node_i.identifier} to {point_j[0]}: Direct distance = {direct_distance}, Total error = {total_error}")
+                #print(f"Comparing {node_i.identifier} to {point_j[0]}: Direct distance = {direct_distance}, Total error = {total_error}")
 
                 # Normalize error as a percentage of the direct distance
                 error_percentage = (abs(((total_error / direct_distance) ) * 100)) if direct_distance != 0 else 0
-                print(f"Error_percentage between point {node_i.identifier} and {point_j[0]}: {error_percentage}%")
+                #print(f"Error_percentage between point {node_i.identifier} and {point_j[0]}: {error_percentage}%")
 
                 if error_percentage < min(lowest_error_percentage, threshold):
                     lowest_error_percentage = error_percentage
                     best_node = node_i
-                    print(f"Error percentage Updated: Point {node_i.identifier} added as best parent node for point {point_j[0]}")
+                    #print(f"Error percentage Updated: Point {node_i.identifier} added as best parent node for point {point_j[0]}")
 
                 if error_percentage > error_multiplier * threshold:
                     termination_set.append(node_i.identifier)
-                    print(f"Point {node_i.identifier} has beeen added to the termination set")
+                    #print(f"Point {node_i.identifier} has beeen added to the termination set")
 
             # Check if the best node found is suitable to be the parent of the new node
             if best_node and lowest_error_percentage < threshold:
@@ -85,13 +85,13 @@ class LayeredDAG:
                 best_node.add_child(new_node)
                 new_layer.append(new_node)
                 self.last_index = point_j[0]  # Update last index as a new node is successfully added
-                print(f"The new layer currently contains: ")
+                #print(f"The new layer currently contains: ")
                 for node in new_layer:
                     parent_id = 'None' if node.parent is None else node.parent.identifier
-                    print(f"  Node {node.identifier} ({node.x}, {node.y}, {node.time}) - Parent ID: {parent_id}")
+                    #print(f"  Node {node.identifier} ({node.x}, {node.y}, {node.time}) - Parent ID: {parent_id}")
 
             if len(termination_set) == len(previous_layer) or point_j[0] == len(data_points):
-                print("Termination set contains all nodes from previous layer in the DAG. Current layer construction is done.")
+                #print("Termination set contains all nodes from previous layer in the DAG. Current layer construction is done.")
                 if new_layer is not None:
                    self.layers.append(new_layer)
                 # If the termination set now has all the nodes from the previous layer, break
