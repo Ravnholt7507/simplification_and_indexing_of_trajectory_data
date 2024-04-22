@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 class TrajectoryEnv:
-    def __init__(self, df, buffer_size=4):
+    def __init__(self, df, buffer_size=20):
         self.buffer_size = buffer_size
         self.k = 3
         self.buffer = pd.DataFrame(columns=['latitude', 'longitude', 'value', 'index'])
