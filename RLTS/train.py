@@ -64,4 +64,4 @@ def train(env, policy_network, episodes, initial_epsilon=0.9, epsilon_decay=0.99
 
         if episode % 100 == 0:
             print(f"Episode {episode}, Loss: {policy_loss.item()}")
-            torch.save(policy_network.state_dict(), "RLTS/models/test_model")
+        torch.save(policy_network.state_dict(), "RLTS/models/test_model")
