@@ -5,7 +5,7 @@ class TrajectoryEnv:
     def __init__(self, df, buffer_size=100):
         self.buffer_size = buffer_size
         self.k = 3
-        self.buffer = pd.DataFrame(columns=['latitude', 'longitude', 'value', 'index']).to_numpy()
+        self.buffer = pd.DataFrame(columns=['longitude', 'latitude', 'value', 'index']).to_numpy()
         self.current_index = 0
         self.acc_reward = 0
         self.trajectory_error = 0
@@ -16,7 +16,7 @@ class TrajectoryEnv:
         self.original_trajectory = df.drop(columns=['taxi_id', 'datetime']).to_numpy()
  
     def reattach_identifiers(self, numeric_data):
-        numeric_df = pd.DataFrame(numeric_data, columns=['latitude', 'longitude', 'value', 'index'])
+        numeric_df = pd.DataFrame(numeric_data, columns=['longitude', 'latitude', 'value', 'index'])
         full_df = pd.merge(self.ids, numeric_df, left_index=True, right_on='index', how='right')
         full_df.drop(columns=['index', 'value'], inplace=True)
         return full_df
