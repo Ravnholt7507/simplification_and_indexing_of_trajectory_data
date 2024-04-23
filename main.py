@@ -4,7 +4,7 @@ from compression_models import pmc_midrange
 from r_tree import init_rtree
 from benchmarks import range_query_no_compression_no_indexing, test_query
 from ui import plot_mbrs
-from RLTS.simplify import rlts, plot_side_by_side
+from RLTS.run_rlts import rlts, plot_side_by_side
 
 
 def main():

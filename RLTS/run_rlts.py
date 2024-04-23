@@ -1,5 +1,6 @@
 import torch
 from RLTS.buffer import TrajectoryEnv
+from RLTS.batch_mode import BatchMode_TrajectoryEnv
 from RLTS.policy import PolicyNetwork
 import matplotlib.pyplot as plt
 
@@ -28,7 +29,7 @@ def plot_side_by_side(df1, df2):
     plt.show()
 
 def rlts(df, threshold = 1.0):
-    env = TrajectoryEnv(df)
+    env = BatchMode_TrajectoryEnv(df)
     policy_network = PolicyNetwork(input_size=env.k, hidden_size=20, output_size=env.k)
     policy_network.state_dict(torch.load("RLTS/models/test_model"))
     policy_network.eval()
