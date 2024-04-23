@@ -4,9 +4,6 @@ from compression_models import pmc_midrange
 from r_tree import init_rtree
 from benchmarks import range_query_no_compression_no_indexing, test_query
 from ui import plot_mbrs
-import torch
-from RLTS.policy import PolicyNetwork
-from RLTS.buffer import TrajectoryEnv
 from RLTS.simplify import rlts, plot_side_by_side
 
 
@@ -17,11 +14,12 @@ def main():
                      sep=",",
                      names=["taxi_id", "datetime", "longitude", "latitude"])
 
-    dots_df = dots(df, 0.05, 1.5)
 
-    rlts(df)
+    dag_df = dots(df, 0.05, 1.5)
+    dag_rtree = init_rtree(dag_df, mbr_points)
 
-    dots_rtree = init_rtree(dots_df, mbr_points) 
+    rlts_df = rlts(df)
+    rlts_rtree = init_rtree(rlts_df, mbr_points)
 
     final_df = pmc_midrange(df, 0.02)
 
@@ -44,13 +42,8 @@ def main():
     range_query_no_compression_no_indexing(coordinates, df)
 
     print("WITH DOTS AND WITH R-TREE INDEXING:")
-    test_query(coordinates, dots_rtree)
+    test_query(coordinates, dag_rtree)
 
-    # print("\nWITH RLTS AND WITH R-TREE INDEXING:")
-    # start = time.time()
-    # bench_results = range_query()
-    # end = time.time()
-    # print("Query without compression and r-tree indexing took ", end - start, "seconds to execute.")
-
-
+    print("\nWITH RLTS AND WITH R-TREE INDEXING:")
+    test_query(coordinates, rlts_rtree)
 main()

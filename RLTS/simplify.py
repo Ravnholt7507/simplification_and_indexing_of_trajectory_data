@@ -27,7 +27,7 @@ def plot_side_by_side(df1, df2):
     plt.tight_layout()
     plt.show()
 
-def rlts(df, policy_network, env, threshold = 1.0):
+def rlts(df, threshold = 1.0):
     env = TrajectoryEnv(df)
     policy_network = PolicyNetwork(input_size=env.k, hidden_size=20, output_size=env.k)
     policy_network.state_dict(torch.load("RLTS/models/test_model"))
@@ -43,10 +43,9 @@ def rlts(df, policy_network, env, threshold = 1.0):
             done = True
             break
 
-
-        with torch.no_grad():  # Ensure no gradients are computed
+        with torch.no_grad():
             probs = policy_network(state_tensor)
-            action = probs.argmax().item()  # Choose the best action
+            action = probs.argmax().item()
 
         next_state, _, done = env.step(action)
         state = next_state
@@ -54,7 +53,6 @@ def rlts(df, policy_network, env, threshold = 1.0):
     print("overall error: ", env.calculate_overall_error())
     print("compression ratio: ", env.calculate_compression_ratio())
     print("largest compression loss for single point: ", env.calculate_simplification_error())
-    plot_side_by_side(original_trajectory, env.buffer)
-
-    env.buffer = env.buffer.drop(columns=['value', 'index'])
-    return env.buffer
+    complete_df = env.reattach_identifiers(env.buffer)
+    #plot_side_by_side(df, env.buffer)
+    return complete_df
