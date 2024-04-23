@@ -17,12 +17,11 @@ def main():
                      sep=",",
                      names=["taxi_id", "datetime", "longitude", "latitude"])
 
-
-    dag_df = dots(df, 0.05, 1.5)
+    dots_df = dots(df, 0.05, 1.5)
 
     rlts(df)
 
-    dag_rtree = init_rtree(dag_df, mbr_points) 
+    dots_rtree = init_rtree(dots_df, mbr_points) 
 
     final_df = pmc_midrange(df, 0.02)
 
@@ -31,25 +30,27 @@ def main():
 
     # r_tree without compression
     no_comp_rtree = init_rtree(df, mbr_points)
-     
+
     # example of query for range search
     coordinates = [39.9, 116.4, 39.95, 116.6]
     # coordinates = [39.5, 116, 40, 117]
     print("WITH PMC-COMPRESSION AND WITH R-TREE INDEXING:")
     test_query(coordinates, rtree)
-    
+
     print("WITHOUT PMC-COMPRESSION AND WITH R-TREE INDEXING")
     test_query(coordinates, no_comp_rtree)
 
     print("\nWITHOUT PMC-COMPRESSION AND WITHOUT R-TREE INDEXING:")
     range_query_no_compression_no_indexing(coordinates, df)
 
-    #print("WITH DOTS AND WITH R-TREE INDEXING:")
-    #test_query(coordinates, dag_rtree)
+    print("WITH DOTS AND WITH R-TREE INDEXING:")
+    test_query(coordinates, dots_rtree)
 
     # print("\nWITH RLTS AND WITH R-TREE INDEXING:")
     # start = time.time()
     # bench_results = range_query()
     # end = time.time()
     # print("Query without compression and r-tree indexing took ", end - start, "seconds to execute.")
+
+
 main()
