@@ -1,4 +1,6 @@
 import torch
+from RLTS.buffer import TrajectoryEnv
+from RLTS.policy import PolicyNetwork
 import matplotlib.pyplot as plt
 
 def plot_side_by_side(df1, df2):
@@ -25,8 +27,12 @@ def plot_side_by_side(df1, df2):
     plt.tight_layout()
     plt.show()
 
-def simplify(original_trajectory, policy_network, env, threshold = 1.0):
-    #env.original_trajectory = test_trajectory.assign(value=0.0)
+def rlts(df, policy_network, env, threshold = 1.0):
+    env = TrajectoryEnv(df)
+    policy_network = PolicyNetwork(input_size=env.k, hidden_size=20, output_size=env.k)
+    policy_network.state_dict(torch.load("RLTS/models/test_model"))
+    policy_network.eval()
+
     state = env.reset()
 
     done = False
