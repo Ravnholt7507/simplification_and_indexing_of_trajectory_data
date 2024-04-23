@@ -28,13 +28,13 @@ def main():
 
     # r_tree without compression
     no_comp_rtree = init_rtree(df, mbr_points)
-     
+
     # example of query for range search
     coordinates = [39.9, 116.4, 39.95, 116.6]
     # coordinates = [39.5, 116, 40, 117]
     print("WITH PMC-COMPRESSION AND WITH R-TREE INDEXING:")
     test_query(coordinates, rtree)
-    
+
     print("WITHOUT PMC-COMPRESSION AND WITH R-TREE INDEXING")
     test_query(coordinates, no_comp_rtree)
 
