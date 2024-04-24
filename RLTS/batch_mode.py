@@ -24,6 +24,15 @@ class BatchMode_TrajectoryEnv:
 
     def calculate_simplification_error(self):
         return self.trajectory_error
+    
+    def exceeds_threshold(self, index, threshold):
+        error = self.buffer[index, 2]
+        prev = self.buffer[index-1, :2]
+        next = self.buffer[index+1, :2]
+
+        error_perc = error / np.linalg.norm(next - prev)
+
+        return error_perc > threshold
 
     def calculate_compression_ratio(self):
         original_points = len(self.trajectory)
@@ -102,7 +111,6 @@ class BatchMode_TrajectoryEnv:
         return sorted_errors, original_indices.tolist()
 
     def step(self, action):
-     #   start = time.time()
         done = False
         state, indices = self.get_state()
 
@@ -130,5 +138,5 @@ class BatchMode_TrajectoryEnv:
         self.current_index = self.buffer_size+1
         for i in range(1, self.buffer_size-1): #opdater værdier for p1, p2, p3
             self.buffer[i][2] = self.ped(self.buffer[i], self.buffer[i+1], self.buffer[i-1])
-        initial_state, _ = self.get_state()
-        return initial_state
+        initial_state, indices = self.get_state()
+        return initial_state, indices

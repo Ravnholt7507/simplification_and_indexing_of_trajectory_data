@@ -1,8 +1,10 @@
 from haversine import haversine
 import pandas as pd
+import time
 pd.options.mode.chained_assignment = None
 
 def pmc_midrange(df, error_bound):
+    start_time = time.time()
     current_lat = df["latitude"].iloc[0]
     current_lon = df["longitude"].iloc[0]
     list_taxi_id = [df["taxi_id"].iloc[0]]
@@ -40,4 +42,6 @@ def pmc_midrange(df, error_bound):
     }
 
     pmc_df = pd.DataFrame(list_concat)
+    end_time = time.time()
+    print("PMC time: ", end_time-start_time)
     return pmc_df

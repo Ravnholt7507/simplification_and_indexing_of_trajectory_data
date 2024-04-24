@@ -2,9 +2,9 @@ import pandas as pd
 from DOTS.run_dots import dots
 from compression_models import pmc_midrange
 from r_tree import init_rtree
-from benchmarks import range_query_no_compression_no_indexing, test_query
+from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio
 from ui import plot_mbrs
-from RLTS.run_rlts import rlts, plot_side_by_side
+from RLTS.run_rlts import rlts
 
 
 def main():
@@ -14,12 +14,11 @@ def main():
                      sep=",",
                      names=["taxi_id", "datetime", "longitude", "latitude"])
 
+    rlts_df = rlts(df, 0.05)
+    rlts_rtree = init_rtree(rlts_df, mbr_points)
 
     dag_df = dots(df, 0.05, 1.5)
     dag_rtree = init_rtree(dag_df, mbr_points)
-
-    rlts_df = rlts(df)
-    rlts_rtree = init_rtree(rlts_df, mbr_points)
 
     final_df = pmc_midrange(df, 0.02)
 
@@ -46,4 +45,11 @@ def main():
 
     print("\nWITH RLTS AND WITH R-TREE INDEXING:")
     test_query(coordinates, rlts_rtree)
+
+    print("\nWITH RLTS AND WITHOUT R-TREE INDEXING:")
+    range_query_no_compression_no_indexing(coordinates, rlts_df)
+
+    print("compression ratio for RLTS is: ", compression_ratio(df, rlts_df))
+    print("compression ratio for DOTS is: ", compression_ratio(df, dag_df))
+    print("compression ratio for PMC is: ", compression_ratio(df, final_df))
 main()

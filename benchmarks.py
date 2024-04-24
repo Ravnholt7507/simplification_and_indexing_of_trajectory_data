@@ -21,3 +21,7 @@ def range_query_no_compression_no_indexing(coordinates, points):
     end = time.time()
     print("Query took ", end - start, " seconds to execute.\n")
     return results
+
+
+def compression_ratio(df, simplified_df):
+    return len(df) / len(simplified_df)
