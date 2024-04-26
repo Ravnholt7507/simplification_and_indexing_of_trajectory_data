@@ -1,5 +1,6 @@
 # INSTALLATION:
-Simply clone the project and run `pip install -r requirements.txt`
+Simply clone the project and run `pip install -r requirements.txt`.
+Linux users might have to also run `pip install PyQt5`
 
 # USAGE:
 ## Initializing r-tree:
