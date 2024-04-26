@@ -5,7 +5,7 @@ class BatchMode_TrajectoryEnv:
     def __init__(self, df):
         self.buffer_size = len(df)
         self.k = 3
-        self.w = 50
+        self.w = len(df) / 2
         self.current_index = 0
         self.acc_reward = 0
         self.trajectory_error = 0
@@ -27,12 +27,8 @@ class BatchMode_TrajectoryEnv:
     
     def exceeds_threshold(self, index, threshold):
         error = self.buffer[index, 2]
-        prev = self.buffer[index-1, :2]
-        next = self.buffer[index+1, :2]
-
-        error_perc = error / np.linalg.norm(next - prev)
-
-        return error_perc > threshold
+        print(index)
+        return error > threshold
 
     def calculate_compression_ratio(self):
         original_points = len(self.trajectory)

@@ -21,13 +21,13 @@ def rlts(df, threshold):
         with torch.no_grad():
             probs = policy_network(state_tensor)
             action = probs.argmax().item()
+            # if env.exceeds_threshold(indices[action], threshold):
+            #     done = True
+            #     break
 
         next_state, _, done = env.step(action)
         state = next_state
-        
-    # print("overall error: ", env.calculate_overall_error())
-    # print("compression ratio: ", env.calculate_compression_ratio())
-    # print("largest compression loss for single point: ", env.calculate_simplification_error())
+
     complete_df = env.reattach_identifiers(env.buffer)
     end_time = time.time()
     print("RLTS time: ", end_time - start_time)
