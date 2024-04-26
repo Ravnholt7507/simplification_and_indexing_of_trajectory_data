@@ -3,14 +3,14 @@ from DOTS.run_dots import dots
 from compression_models import pmc_midrange
 from r_tree import init_rtree
 from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio
-from ui import plot_mbrs
+from ui import plot_mbrs, plot_query
 from RLTS.run_rlts import rlts
 
 
 def main():
-    mbr_points = 5 
+    mbr_points = 5
 
-    df = pd.read_csv("release/taxi_log_2008_by_id/1.txt",
+    df = pd.read_csv("release/taxi_log_2008_by_id/10076.txt",
                      sep=",",
                      names=["taxi_id", "datetime", "longitude", "latitude"])
 
@@ -52,4 +52,9 @@ def main():
     print("compression ratio for RLTS is: ", compression_ratio(df, rlts_df))
     print("compression ratio for DOTS is: ", compression_ratio(df, dag_df))
     print("compression ratio for PMC is: ", compression_ratio(df, final_df))
+
+    # plot_mbrs(rlts_df["longitude"], rlts_df["latitude"], rlts_rtree)
+    # plot_query(df["longitude"], df["latitude"], coordinates)
+
+
 main()

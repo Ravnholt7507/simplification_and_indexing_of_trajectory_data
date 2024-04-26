@@ -10,7 +10,6 @@ def test_query(coordinates, rtree):
     print("Query took ", end - start, " seconds to execute.\n")
 
 
-
 def range_query_no_compression_no_indexing(coordinates, points):
     start = time.time()
     results = []
