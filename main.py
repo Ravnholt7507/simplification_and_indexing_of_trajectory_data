@@ -2,7 +2,8 @@ import pandas as pd
 from DOTS.run_dots import dots
 from compression_models import pmc_midrange
 from r_tree import init_rtree
-from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio
+from grid_index import init_grid_index
+from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio, test_query_grid_index
 from ui import plot_mbrs, plot_query
 from RLTS.run_rlts import rlts
 
@@ -28,8 +29,11 @@ def main():
     # r_tree without compression
     no_comp_rtree = init_rtree(df, mbr_points)
 
+    # grid index with no compression
+    grid_index = init_grid_index(df)
+
     # example of query for range search
-    coordinates = [39.9, 116.4, 39.95, 116.6]
+    coordinates = [39.9, 116.4, 39.92, 116.5]
     # coordinates = [39.5, 116, 40, 117]
     print("WITH PMC-COMPRESSION AND WITH R-TREE INDEXING:")
     test_query(coordinates, rtree)
@@ -48,6 +52,9 @@ def main():
 
     print("\nWITH RLTS AND WITHOUT R-TREE INDEXING:")
     range_query_no_compression_no_indexing(coordinates, rlts_df)
+
+    print(("\nWITH NO COMPRESSION AND WITH GRID INDEXING:"))
+    test_query_grid_index(coordinates, grid_index)
 
     print("compression ratio for RLTS is: ", compression_ratio(df, rlts_df))
     print("compression ratio for DOTS is: ", compression_ratio(df, dag_df))

@@ -1,4 +1,5 @@
 from datetime import datetime
+import pandas as pd
 
 
 # range query based on time
@@ -53,12 +54,6 @@ def range_query(coordinates, rtree):
     result = _range_query(coordinates, rtree.root, result)
     if not None:
         print("The query returned ", len(result), " result(s)")
-        """
-        for element in result:
-            print("_________________________________")
-            print(element)
-            print("_________________________________")
-        """
     return result
 
 
@@ -106,3 +101,17 @@ def within(coordinates, point):
         return True
 
     return False
+
+
+def grid_index_range_query(bbox, grid):
+    miny, minx, maxy, maxx = bbox
+    result_rows = []
+    x_range = range(int((minx - grid.x_min) / grid.cell_size), int((maxx - grid.x_min) / grid.cell_size) + 1)
+    y_range = range(int((miny - grid.y_min) / grid.cell_size), int((maxy - grid.y_min) / grid.cell_size) + 1)
+    for i in x_range:
+        for j in y_range:
+            key = (i, j)
+            if key in grid.cells:
+                result_rows.extend([{"longitude": x, "latitude": y} for x, y, _ in grid.cells[key] if minx <= x <= maxx and miny <= y <= maxy])
+    print("The query returned ", len(result_rows), " result(s)")
+    return pd.DataFrame(result_rows)
