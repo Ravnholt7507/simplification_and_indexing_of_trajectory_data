@@ -117,9 +117,9 @@ def grid_index_range_query(bbox, grid):
     return pd.DataFrame(result_rows)
 
 
-def naive_knn(poi, rtree):
+def optimal_knn(poi, rtree):
     result = []
-    _naive_knn(poi, rtree.root, result)
+    _optimal_knn(poi, rtree.root, result)
     if len(result) > 1:
         distances = []
         for element in result:
@@ -129,7 +129,7 @@ def naive_knn(poi, rtree):
     return result
 
 
-def _naive_knn(poi, node, result):
+def _optimal_knn(poi, node, result):
     is_within = False
     if node.is_leaf:
         distances = []
@@ -148,14 +148,14 @@ def _naive_knn(poi, node, result):
         for child in node.children:
             mbr = [child.mbr["min"][0], child.mbr["min"][1], child.mbr["max"][0], child.mbr["max"][1]]
             if within(mbr, poi):
-                _naive_knn(poi, child, result)
+                _optimal_knn(poi, child, result)
                 is_within = True 
         if not is_within:
             distances = []
             for child in node.children:
                 mbr = [child.mbr["min"][0], child.mbr["min"][1], child.mbr["max"][0], child.mbr["max"][1]]
                 distances.append(distance_rectangles(mbr, poi))
-            _naive_knn(poi, node.children[distances.index(min(distances))], result)
+            _optimal_knn(poi, node.children[distances.index(min(distances))], result)
     return result
 
             

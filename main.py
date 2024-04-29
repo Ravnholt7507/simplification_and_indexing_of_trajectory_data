@@ -6,7 +6,7 @@ from grid_index import init_grid_index
 from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio, test_query_grid_index
 from ui import plot_mbrs, plot_query
 from RLTS.run_rlts import rlts
-from queries import naive_knn
+from queries import optimal_knn 
 
 
 def main():
@@ -62,7 +62,7 @@ def main():
     print("compression ratio for PMC is: ", compression_ratio(df, final_df))
 
     print("---------- knn test ----------------:")
-    print(naive_knn((39.96769, 116.40239), no_comp_rtree))
+    print(optimal_knn((39.96769, 116.40239), no_comp_rtree))
 
 
 main()
