@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from haversine import haversine
 
 # range query based on time
 def time_query(start_time, end_time, tree):
@@ -106,3 +106,64 @@ def within(coordinates, point):
         return True
 
     return False
+
+
+def naive_knn(poi, rtree):
+    result = []
+    _naive_knn(poi, rtree.root, result)
+    if len(result) > 1:
+        distances = []
+        for element in result:
+            distances.append(haversine((element["latitude"], element["longitude"]), poi))
+        return result[distances.index(min(distances))]  
+
+    return result
+def _naive_knn(poi, node, result):
+    is_within = False
+    if node.is_leaf:
+        distances = []
+        for child in node.children:
+            mbr = [child.mbr["min"][0], child.mbr["min"][1], child.mbr["max"][0], child.mbr["max"][1]]
+            if within(mbr, poi):
+                result.append(closest_point(child.mbr["points"], poi))
+                is_within = True
+        if not is_within:
+            distances = []
+            for child in node.children:
+                mbr = [child.mbr["min"][0], child.mbr["min"][1], child.mbr["max"][0], child.mbr["max"][1]]
+                distances.append(distance_rectangles(mbr, poi))
+            result.append(closest_point(node.children[distances.index(min(distances))].mbr["points"], poi))
+    else:
+        for child in node.children:
+            mbr = [child.mbr["min"][0], child.mbr["min"][1], child.mbr["max"][0], child.mbr["max"][1]]
+            if within(mbr, poi):
+                _naive_knn(poi, child, result)
+                is_within = True 
+        if not is_within:
+            distances = []
+            for child in node.children:
+                mbr = [child.mbr["min"][0], child.mbr["min"][1], child.mbr["max"][0], child.mbr["max"][1]]
+                distances.append(distance_rectangles(mbr, poi))
+            _naive_knn(poi, node.children[distances.index(min(distances))], result)
+    return result
+
+            
+def distance_rectangles(mbr, poi):
+    lat1, lon1, lat2, lon2 = mbr
+    lat_p, lon_p = poi
+    distances = [haversine((lat_p, lon_p), (lat1, lon1)),  # Distance to left edge
+                 haversine((lat_p, lon_p), (lat1, lon2)),  # Distance to right edge
+                 haversine((lat_p, lon_p), (lat2, lon1)),  # Distance to bottom edge
+                 haversine((lat_p, lon_p), (lat2, lon2))   # Distance to top edge
+                 ]
+
+    return min(distances)
+
+
+def closest_point(points, poi):
+    distances = []
+    lat_p, lon_p = poi
+    for index, row in points.iterrows():
+        distances.append(haversine((lat_p, lon_p), (row["latitude"], row["longitude"])))
+    return points.iloc[distances.index(min(distances))]
+

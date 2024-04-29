@@ -5,6 +5,7 @@ from r_tree import init_rtree
 from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio
 from ui import plot_mbrs, plot_query
 from RLTS.run_rlts import rlts
+from queries import naive_knn
 
 
 def main():
@@ -48,13 +49,12 @@ def main():
 
     print("\nWITH RLTS AND WITHOUT R-TREE INDEXING:")
     range_query_no_compression_no_indexing(coordinates, rlts_df)
-
     print("compression ratio for RLTS is: ", compression_ratio(df, rlts_df))
     print("compression ratio for DOTS is: ", compression_ratio(df, dag_df))
     print("compression ratio for PMC is: ", compression_ratio(df, final_df))
 
-    # plot_mbrs(rlts_df["longitude"], rlts_df["latitude"], rlts_rtree)
-    # plot_query(df["longitude"], df["latitude"], coordinates)
+    print("---------- knn test ----------------:")
+    print(naive_knn((39.96769, 116.40239), no_comp_rtree))
 
 
 main()
