@@ -127,6 +127,8 @@ def naive_knn(poi, rtree):
         return result[distances.index(min(distances))]  
 
     return result
+
+
 def _naive_knn(poi, node, result):
     is_within = False
     if node.is_leaf:
