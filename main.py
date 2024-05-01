@@ -3,7 +3,7 @@ from DOTS.run_dots import dots
 from compression_models import pmc_midrange
 from r_tree import init_rtree
 from grid_index import init_grid_index
-from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio, test_query_grid_index
+from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio, test_query_grid_index, calculate_range_query_accuracy
 from ui import plot_mbrs, plot_query
 from RLTS.run_rlts import rlts
 from queries import optimal_knn 
@@ -63,6 +63,11 @@ def main():
 
     print("---------- knn test ----------------:")
     print(optimal_knn((39.96769, 116.40239), no_comp_rtree))
+
+    #Query accuracy tests
+    print("range query accuracy with RLTS is: ", calculate_range_query_accuracy(coordinates, df, rlts_df)) 
+    print("range query accuracy with DOTS is: ", calculate_range_query_accuracy(coordinates, df, dag_df)) 
+    print("range query accuracy with PMC is: ", calculate_range_query_accuracy(coordinates, df, final_df)) 
 
 
 main()
