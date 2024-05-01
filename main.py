@@ -2,9 +2,10 @@ import pandas as pd
 import time
 from DOTS.run_dots import dots
 from compression_models import pmc_midrange
+from pympler import asizeof
 from r_tree import init_rtree
 from grid_index import init_grid_index
-from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio, test_query_grid_index, calculate_range_query_accuracy, knn_no_indexing
+from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio, test_query_grid_index, calculate_range_query_accuracy, knn_no_indexing, print_full_size
 from ui import plot_mbrs, plot_query
 from RLTS.run_rlts import rlts
 from queries import optimal_knn
@@ -80,5 +81,7 @@ def main():
     print("range query accuracy with DOTS is: ", calculate_range_query_accuracy(coordinates, df, dag_df))
     print("range query accuracy with PMC is: ", calculate_range_query_accuracy(coordinates, df, final_df))
 
+    print_full_size(grid_index, 'grid_index')
+    print_full_size(rtree, 'r-tree')
 
 main()

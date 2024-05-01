@@ -4,6 +4,7 @@ from RLTS.run_rlts import rlts
 from compression_models import pmc_midrange
 import pandas as pd
 import os
+from pympler import asizeof
 import random
 from haversine import haversine
 import time
@@ -21,6 +22,12 @@ def test_query_grid_index(coordinates, grid_index):
     end = time.perf_counter()
     print("Query took ", end - start, " seconds to execute.\n")
 
+def print_full_size(grid_index, label):
+    print(f"Full memory size of {label}: {asizeof.asizeof(grid_index)} bytes")
+
+# Function to print full memory usage of an object
+def print_full_size(obj, label):
+    print(f"Full memory size of {label}: {asizeof.asizeof(obj)} bytes")
 
 def range_query_no_compression_no_indexing(coordinates, points):
     start = time.perf_counter()
@@ -110,4 +117,4 @@ def eval_accuracy(test_count):
     df.to_csv("eval_accuracy.csv")
 
 
-eval_accuracy(1)
+eval_accuracy(100)

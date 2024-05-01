@@ -3,3 +3,4 @@ haversine
 datetime
 matplotlib
 torch
+Pympler
