@@ -1,9 +1,10 @@
 import pandas as pd
+import time
 from DOTS.run_dots import dots
 from compression_models import pmc_midrange
 from r_tree import init_rtree
 from grid_index import init_grid_index
-from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio, test_query_grid_index
+from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio, test_query_grid_index, knn_no_indexing
 from ui import plot_mbrs, plot_query
 from RLTS.run_rlts import rlts
 from queries import optimal_knn 
@@ -62,7 +63,17 @@ def main():
     print("compression ratio for PMC is: ", compression_ratio(df, final_df))
 
     print("---------- knn test ----------------:")
+    print("----With r-tree:")
+    start = time.perf_counter()
     print(optimal_knn((39.96769, 116.40239), no_comp_rtree))
+    end = time.perf_counter()
+    print("KNN with r-tree took ", end - start, "seconds to execute.")
+
+    print("--Without r-tree:")
+    start = time.perf_counter()
+    print(knn_no_indexing((39.96769, 116.40239), df))
+    end = time.perf_counter()
+    print("KNN without r-tree took ", end - start, "seconds to execute.")
 
 
 main()
