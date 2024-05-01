@@ -1,5 +1,6 @@
 from queries import range_query, grid_index_range_query, within
 from DOTS.run_dots import dots
+from RLTS.run_rlts import rlts
 from compression_models import pmc_midrange
 import pandas as pd
 import os
@@ -55,7 +56,10 @@ def calculate_range_query_accuracy(bbox, original_df, simplified_df):
     count_original_in_bbox = len(original_in_bbox)
     count_simplified_in_bbox = len(simplified_in_bbox)
 
-    accuracy = count_simplified_in_bbox / count_original_in_bbox
+    if count_original_in_bbox != 0:
+        accuracy = (count_simplified_in_bbox / count_original_in_bbox)
+    else:
+        accuracy = 1
 
     return accuracy
 
@@ -83,7 +87,7 @@ def get_random_trajectory(min_rows=1500):
     return None
 def eval_accuracy(test_count):
     i = 0
-    rlts = []
+    rlts_values = []
     pmc = []
     dag = []
 
@@ -96,14 +100,14 @@ def eval_accuracy(test_count):
         dag.append(calculate_range_query_accuracy(bbox, df, dag_df))
 
         rlts_df = rlts(df, 0.05)
-        rlts.append(calculate_range_query_accuracy(bbox, df, rlts_df))
+        rlts_values.append(calculate_range_query_accuracy(bbox, df, rlts_df))
 
         pmc_df = pmc_midrange(df, 0.02)
         pmc.append(calculate_range_query_accuracy(bbox, df, pmc_df))
         i += 1
-    dict = {"rlts": rlts, "pmc": pmc, "dag": dag}
+    dict = {"rlts": rlts_values, "pmc": pmc, "dag": dag}
     df = pd.DataFrame(dict)
     df.to_csv("eval_accuracy.csv")
 
 
-eval_accuracy(100)
+eval_accuracy(1)
