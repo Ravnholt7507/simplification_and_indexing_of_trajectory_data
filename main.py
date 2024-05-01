@@ -4,7 +4,7 @@ from DOTS.run_dots import dots
 from compression_models import pmc_midrange
 from r_tree import init_rtree
 from grid_index import init_grid_index
-from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio, test_query_grid_index, knn_no_indexing
+from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio, test_query_grid_index, calculate_range_query_accuracy, knn_no_indexing
 from ui import plot_mbrs, plot_query
 from RLTS.run_rlts import rlts
 from queries import optimal_knn 
@@ -74,6 +74,13 @@ def main():
     print(knn_no_indexing((39.96769, 116.40239), df))
     end = time.perf_counter()
     print("KNN without r-tree took ", end - start, "seconds to execute.")
+
+    #Query accuracy tests
+    print("range query accuracy with RLTS is: ", calculate_range_query_accuracy(coordinates, df, rlts_df)) 
+    print("range query accuracy with DOTS is: ", calculate_range_query_accuracy(coordinates, df, dag_df)) 
+    print("range query accuracy with PMC is: ", calculate_range_query_accuracy(coordinates, df, final_df)) 
+
+
 
 
 main()

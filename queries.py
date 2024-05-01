@@ -116,7 +116,6 @@ def grid_index_range_query(bbox, grid):
     print("The query returned ", len(result_rows), " result(s)")
     return pd.DataFrame(result_rows)
 
-
 def optimal_knn(poi, rtree):
     result = []
     _optimal_knn(poi, rtree.root, result)
