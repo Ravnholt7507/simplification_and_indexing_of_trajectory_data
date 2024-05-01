@@ -148,7 +148,7 @@ def _optimal_knn(poi, node, result):
             mbr = [child.mbr["min"][0], child.mbr["min"][1], child.mbr["max"][0], child.mbr["max"][1]]
             if within(mbr, poi):
                 _optimal_knn(poi, child, result)
-                is_within = True 
+                is_within = True
         if not is_within:
             distances = []
             for child in node.children:
@@ -157,7 +157,7 @@ def _optimal_knn(poi, node, result):
             _optimal_knn(poi, node.children[distances.index(min(distances))], result)
     return result
 
-            
+
 def distance_rectangles(mbr, poi):
     lat1, lon1, lat2, lon2 = mbr
     lat_p, lon_p = poi
@@ -176,4 +176,3 @@ def closest_point(points, poi):
     for index, row in points.iterrows():
         distances.append(haversine((lat_p, lon_p), (row["latitude"], row["longitude"])))
     return points.iloc[distances.index(min(distances))]
-

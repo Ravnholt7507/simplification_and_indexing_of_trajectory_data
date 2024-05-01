@@ -1,4 +1,9 @@
 from queries import range_query, grid_index_range_query, within
+from DOTS.run_dots import dots
+from compression_models import pmc_midrange
+import pandas as pd
+import os
+import random
 from haversine import haversine
 import time
 
@@ -41,15 +46,64 @@ def compression_ratio(df, simplified_df):
 
 def calculate_range_query_accuracy(bbox, original_df, simplified_df):
     min_y, min_x, max_y, max_x = bbox
+
     def points_in_bbox(df):
         return df[(df['longitude'] >= min_x) & (df['longitude'] <= max_x) & (df['latitude'] >= min_y) & (df['latitude'] <= max_y)]
-    
+
     original_in_bbox = points_in_bbox(original_df)
     simplified_in_bbox = points_in_bbox(simplified_df)
     count_original_in_bbox = len(original_in_bbox)
     count_simplified_in_bbox = len(simplified_in_bbox)
-    
+
     accuracy = count_simplified_in_bbox / count_original_in_bbox
-    
+
     return accuracy
-    
+
+def get_random_bbox(min_lat, min_lon, max_lat, max_lon):
+    lat1 = random.uniform(min_lat, max_lat)
+    lat2 = random.uniform(min_lat, max_lat)
+    lon1 = random.uniform(min_lon, max_lon)
+    lon2 = random.uniform(min_lon, max_lon)
+    min_lat = min(lat1, lat2)
+    max_lat = max(lat1, lat2)
+    min_lon = min(lon1, lon2)
+    max_lon = max(lon1, lon2)
+    return [min_lat, min_lon, max_lat, max_lon]
+
+def get_random_trajectory(min_rows=1500):
+    folder_path = "release/taxi_log_2008_by_id"
+    files = [os.path.join(folder_path, file) for file in os.listdir(folder_path)]
+    random.shuffle(files)
+
+    for file_path in files:
+        df = pd.read_csv(file_path, names=["taxi_id", "datetime", "longitude", "latitude"])
+        if len(df) > min_rows:
+            return df
+
+    return None
+def eval_accuracy(test_count):
+    i = 0
+    rlts = []
+    pmc = []
+    dag = []
+
+    while i < test_count:
+        print("round: ", i)
+        df = get_random_trajectory()
+        bbox = get_random_bbox(df["latitude"].min(), df["longitude"].min(), df["latitude"].max(), df["longitude"].max())
+
+        dag_df = dots(df, 0.05, 1.5)
+        dag.append(calculate_range_query_accuracy(bbox, df, dag_df))
+
+        rlts_df = rlts(df, 0.05)
+        rlts.append(calculate_range_query_accuracy(bbox, df, rlts_df))
+
+        pmc_df = pmc_midrange(df, 0.02)
+        pmc.append(calculate_range_query_accuracy(bbox, df, pmc_df))
+        i += 1
+    dict = {"rlts": rlts, "pmc": pmc, "dag": dag}
+    df = pd.DataFrame(dict)
+    df.to_csv("eval_accuracy.csv")
+
+
+eval_accuracy(100)
