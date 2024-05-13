@@ -17,8 +17,10 @@ def main():
     df = pd.read_csv("release/taxi_log_2008_by_id/10076.txt",
                      sep=",",
                      names=["taxi_id", "datetime", "longitude", "latitude"])
+    
+    print(len(df))
 
-    rlts_df = rlts(df, 0.05)
+    rlts_df = rlts(df, 50)
     rlts_rtree = init_rtree(rlts_df, mbr_points)
 
     dag_df = dots(df, 0.05, 1.5)
@@ -81,7 +83,8 @@ def main():
     print("range query accuracy with DOTS is: ", calculate_range_query_accuracy(coordinates, df, dag_df))
     print("range query accuracy with PMC is: ", calculate_range_query_accuracy(coordinates, df, final_df))
 
-    print_full_size(grid_index, 'grid_index')
-    print_full_size(rtree, 'r-tree')
+    #Index memory usage
+    #print_full_size(grid_index, 'grid_index')
+    #print_full_size(rtree, 'r-tree')
 
 main()

@@ -1,6 +1,12 @@
 import pandas as pd
 import numpy as np
 
+def degrees_to_meters(angular_distance_degrees, earth_radius=6371000):
+    from math import pi
+    angular_distance_radians = angular_distance_degrees * (pi / 180)
+    distance_meters = angular_distance_radians * earth_radius
+    return distance_meters
+
 class BatchMode_TrajectoryEnv:
     def __init__(self, df):
         self.buffer_size = len(df)
@@ -27,7 +33,8 @@ class BatchMode_TrajectoryEnv:
     
     def exceeds_threshold(self, index, threshold):
         error = self.buffer[index, 2]
-        print(index)
+        error = degrees_to_meters(error)
+        print("error in meters: ", error)
         return error > threshold
 
     def calculate_compression_ratio(self):
@@ -124,8 +131,8 @@ class BatchMode_TrajectoryEnv:
             reward = 0
             done = True
 
-        next_state, _ = self.get_state()
-        return next_state, reward, done
+        next_state, indices = self.get_state()
+        return next_state, indices, reward, done
 
     def reset(self):
         self.trajectory_error = 0

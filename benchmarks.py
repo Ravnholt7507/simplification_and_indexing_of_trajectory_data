@@ -116,5 +116,4 @@ def eval_accuracy(test_count):
     df = pd.DataFrame(dict)
     df.to_csv("eval_accuracy.csv")
 
-
-eval_accuracy(100)
+#eval_accuracy(100)

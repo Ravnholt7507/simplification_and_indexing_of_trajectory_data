@@ -29,7 +29,7 @@ def train(env, policy_network, episodes, initial_epsilon=0.9, epsilon_decay=0.99
             log_prob = m.log_prob(action)
           #  end = time.time()
           #  print("first loop in train time", (end-start))
-            next_state, reward, done = env.step(action.item())
+            next_state, indices, reward, done = env.step(action.item())
             log_probs.append(log_prob)
             rewards.append(reward)
 
