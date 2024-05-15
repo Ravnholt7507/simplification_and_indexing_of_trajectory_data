@@ -21,10 +21,10 @@ def rlts(df, threshold):
         with torch.no_grad():
             probs = policy_network(state_tensor)
             action = probs.argmax().item()
-            if env.exceeds_threshold(indices[action], threshold):
-                print("threshold met")
-                done = True
-                break
+            # if env.exceeds_threshold(indices[action], threshold):
+            #     print("threshold met")
+            #     done = True
+            #     break
 
         next_state, indices, _, done = env.step(action)
         indices = indices

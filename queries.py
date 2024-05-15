@@ -1,5 +1,7 @@
 from datetime import datetime
 import pandas as pd
+import heapq
+import numpy as np
 from haversine import haversine
 
 # range query based on time
@@ -176,3 +178,25 @@ def closest_point(points, poi):
     for index, row in points.iterrows():
         distances.append(haversine((lat_p, lon_p), (row["latitude"], row["longitude"])))
     return points.iloc[distances.index(min(distances))]
+
+
+def knn_query_grid_index(grid_index, point, k):
+    query_cell = grid_index._get_cell(point)
+    neighbors = []
+
+    # Explore the cell and its neighbors
+    cells_to_check = grid_index._get_surrounding_cells(query_cell)
+    
+    for cell in cells_to_check:
+        if cell in grid_index.cells:
+            for point in grid_index.cells[cell]:
+                distance = euclidean_distance(point, point[:2])
+                heapq.heappush(neighbors, (distance, point))
+                if len(neighbors) > k:
+                    heapq.heappop(neighbors)
+
+    # Get the k nearest neighbors
+    return [heapq.heappop(neighbors)[1] for _ in range(len(neighbors))][::-1]
+
+def euclidean_distance(point1, point2):
+    return np.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)

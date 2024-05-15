@@ -5,7 +5,7 @@ from compression_models import pmc_midrange
 from pympler import asizeof
 from r_tree import init_rtree
 from grid_index import init_grid_index
-from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio, test_query_grid_index, calculate_range_query_accuracy, knn_no_indexing, print_full_size
+from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio, test_query_grid_index, calculate_range_query_accuracy, knn_no_indexing, print_full_size,knn_grid_index
 from ui import plot_mbrs, plot_query
 from RLTS.run_rlts import rlts
 from queries import optimal_knn
@@ -77,6 +77,9 @@ def main():
     print(knn_no_indexing((39.96769, 116.40239), df))
     end = time.perf_counter()
     print("KNN without r-tree took ", end - start, "seconds to execute.")
+
+    print("--With Grid Index:")
+    print(knn_grid_index((39.96769, 116.40239), grid_index))
 
     # Query accuracy tests
     print("range query accuracy with RLTS is: ", calculate_range_query_accuracy(coordinates, df, rlts_df))

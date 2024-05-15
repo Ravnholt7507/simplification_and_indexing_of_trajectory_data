@@ -1,4 +1,4 @@
-from queries import range_query, grid_index_range_query, within
+from queries import range_query, grid_index_range_query, within, knn_query_grid_index
 from DOTS.run_dots import dots
 from RLTS.run_rlts import rlts
 from compression_models import pmc_midrange
@@ -6,6 +6,7 @@ import pandas as pd
 import os
 from pympler import asizeof
 import random
+import heapq
 from haversine import haversine
 import time
 
@@ -22,12 +23,6 @@ def test_query_grid_index(coordinates, grid_index):
     end = time.perf_counter()
     print("Query took ", end - start, " seconds to execute.\n")
 
-def print_full_size(grid_index, label):
-    print(f"Full memory size of {label}: {asizeof.asizeof(grid_index)} bytes")
-
-# Function to print full memory usage of an object
-def print_full_size(obj, label):
-    print(f"Full memory size of {label}: {asizeof.asizeof(obj)} bytes")
 
 def range_query_no_compression_no_indexing(coordinates, points):
     start = time.perf_counter()
@@ -40,13 +35,19 @@ def range_query_no_compression_no_indexing(coordinates, points):
     print("Query took ", end - start, " seconds to execute.\n")
     return results
 
-
 def knn_no_indexing(poi, df):
     closest_point = df.iloc[0]
     for index, row in df.iterrows():
         if haversine((row["latitude"], row["longitude"]), poi) < haversine((closest_point["latitude"], closest_point["longitude"]), poi):
             closest_point = row
     return closest_point
+
+def knn_grid_index(point, grid_index):
+    start = time.perf_counter()
+    results = knn_query_grid_index(grid_index, point, 2)
+    end = time.perf_counter()
+    print("Query took ", end - start, " seconds to execute.\n")
+
 
 def compression_ratio(df, simplified_df):
     return len(df) / len(simplified_df)
@@ -70,6 +71,13 @@ def calculate_range_query_accuracy(bbox, original_df, simplified_df):
 
     return accuracy
 
+def print_full_size(grid_index, label):
+    print(f"Full memory size of {label}: {asizeof.asizeof(grid_index)} bytes")
+
+# Function to print full memory usage of an object
+def print_full_size(obj, label):
+    print(f"Full memory size of {label}: {asizeof.asizeof(obj)} bytes")
+
 def get_random_bbox(min_lat, min_lon, max_lat, max_lon):
     lat1 = random.uniform(min_lat, max_lat)
     lat2 = random.uniform(min_lat, max_lat)
@@ -81,7 +89,7 @@ def get_random_bbox(min_lat, min_lon, max_lat, max_lon):
     max_lon = max(lon1, lon2)
     return [min_lat, min_lon, max_lat, max_lon]
 
-def get_random_trajectory(min_rows=1500):
+def get_random_trajectory(min_rows=1000):
     folder_path = "release/taxi_log_2008_by_id"
     files = [os.path.join(folder_path, file) for file in os.listdir(folder_path)]
     random.shuffle(files)
@@ -116,4 +124,4 @@ def eval_accuracy(test_count):
     df = pd.DataFrame(dict)
     df.to_csv("eval_accuracy.csv")
 
-#eval_accuracy(100)
+eval_accuracy(100)
