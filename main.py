@@ -3,6 +3,7 @@ import time
 from DOTS.run_dots import dots
 from compression_models import pmc_midrange
 from pympler import asizeof
+from squish import SquishE, squish
 from r_tree import init_rtree
 from grid_index import init_grid_index
 from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio, test_query_grid_index, calculate_range_query_accuracy, knn_no_indexing, print_full_size,knn_grid_index
@@ -22,6 +23,9 @@ def main():
 
     rlts_df = rlts(df, 50)
     rlts_rtree = init_rtree(rlts_df, mbr_points)
+
+    squish_df = rlts(df, 50)
+    squish_rtree = init_rtree(rlts_df, mbr_points)
 
     dag_df = dots(df, 0.05, 1.5)
     dag_rtree = init_rtree(dag_df, mbr_points)
@@ -54,6 +58,9 @@ def main():
 
     print("\nWITH RLTS AND WITH R-TREE INDEXING:")
     test_query(coordinates, rlts_rtree)
+
+    print("\nWITH SQUISH AND WITH R-TREE INDEXING:")
+    test_query(coordinates, squish_rtree)
 
     print("\nWITH RLTS AND WITHOUT R-TREE INDEXING:")
     range_query_no_compression_no_indexing(coordinates, rlts_df)

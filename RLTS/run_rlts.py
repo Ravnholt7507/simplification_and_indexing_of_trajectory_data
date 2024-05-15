@@ -5,9 +5,10 @@ from RLTS.policy import PolicyNetwork
 import time
 import matplotlib.pyplot as plt
 
-def rlts(df, threshold):
+def rlts(df, size):
     start_time = time.time()
-    env = BatchMode_TrajectoryEnv(df)
+    #env = BatchMode_TrajectoryEnv(df)
+    env = TrajectoryEnv(df, size)
     policy_network = PolicyNetwork(input_size=env.k, hidden_size=20, output_size=env.k)
     policy_network.state_dict(torch.load("RLTS/models/batch_model"))
     policy_network.eval()

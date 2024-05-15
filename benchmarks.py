@@ -4,6 +4,7 @@ from RLTS.run_rlts import rlts
 from compression_models import pmc_midrange
 import pandas as pd
 import os
+import csv
 from pympler import asizeof
 import random
 import heapq
@@ -89,17 +90,31 @@ def get_random_bbox(min_lat, min_lon, max_lat, max_lon):
     max_lon = max(lon1, lon2)
     return [min_lat, min_lon, max_lat, max_lon]
 
-def get_random_trajectory(min_rows=1000):
+def get_random_trajectory(min_rows=1000, max_rows=10000):
     folder_path = "release/taxi_log_2008_by_id"
     files = [os.path.join(folder_path, file) for file in os.listdir(folder_path)]
     random.shuffle(files)
 
     for file_path in files:
         df = pd.read_csv(file_path, names=["taxi_id", "datetime", "longitude", "latitude"])
-        if len(df) > min_rows:
+        if len(df) > min_rows and len(df) < max_rows:
             return df
 
     return None
+
+def get_trajectories(min_rows=0, max_rows=20000):
+    folder_path = "release/taxi_log_2008_by_id"
+    files = [os.path.join(folder_path, file) for file in os.listdir(folder_path)]
+    random.shuffle(files)
+    dfs = []
+
+    for file_path in files:
+        df = pd.read_csv(file_path, names=["taxi_id", "datetime", "longitude", "latitude"])
+        if len(df) > min_rows and len(df) < max_rows:
+            dfs.append(df)
+
+    return dfs
+
 def eval_accuracy(test_count):
     i = 0
     rlts_values = []
@@ -124,4 +139,57 @@ def eval_accuracy(test_count):
     df = pd.DataFrame(dict)
     df.to_csv("eval_accuracy.csv")
 
-eval_accuracy(100)
+
+def eval_time(min_points, max_points, output_file='timing_results.csv'):
+    time_DOTS = 0
+    time_RLTS = 0
+    trajectories = get_trajectories(min_points, max_points)
+    if len(trajectories) > 100: #we want max hundred trajectories
+        trajectories = trajectories[:100]
+    n_of_trajectories = len(trajectories)
+    print(n_of_trajectories)
+
+    with open(output_file, 'a', newline='') as f:
+        writer = csv.writer(f)
+        # Write the header row
+
+        for df in trajectories:
+            start = time.perf_counter()
+            result = dots(df, 0.05, 1.5)
+            end = time.perf_counter()
+            dots_time = end - start
+            time_DOTS += dots_time
+
+            compression = len(result)
+            print(len(df))
+            print(compression)
+            if compression < 10:
+                compression = 10
+
+            start = time.perf_counter()
+            rlts(df, compression)
+            end = time.perf_counter()
+            rlts_time = end - start
+            time_RLTS += rlts_time
+
+            # Write the times for each run to the CSV file
+            writer.writerow([dots_time, rlts_time, max_points])
+
+    avg_DOTS_time = (time_DOTS / n_of_trajectories)
+    avg_RLTS_time = (time_RLTS / n_of_trajectories)
+    return avg_DOTS_time, avg_RLTS_time
+
+def compression_time_test():
+    print("Running compression time test")
+    dots1, rlts1 = eval_time(100, 500)
+    dots1, rlts1 = eval_time(500, 1000)
+    dots1, rlts1 = eval_time(1000, 1500)
+    dots1, rlts1 = eval_time(1500, 2000)
+    dots1, rlts1 = eval_time(2000, 2500)
+    dots1, rlts1 = eval_time(2500, 3000)
+    dots1, rlts1 = eval_time(3000, 3500)
+    dots1, rlts1 = eval_time(3500, 4000)
+    dots1, rlts1 = eval_time(4000, 4500)
+    dots1, rlts1 = eval_time(4500, 5000)
+#compression_time_test()
+#eval_accuracy(100)

@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 class TrajectoryEnv:
-    def __init__(self, df, buffer_size=100):
+    def __init__(self, df, buffer_size):
         self.buffer_size = buffer_size
         self.k = 3
         self.buffer = pd.DataFrame(columns=['longitude', 'latitude', 'value', 'index']).to_numpy()
@@ -123,8 +123,8 @@ class TrajectoryEnv:
         reward = -self.trajectory_error
 
         self.current_index += 1
-        next_state, _ = self.get_state()
-        return next_state, reward, done
+        next_state, indices = self.get_state()
+        return next_state, indices, reward, done
 
     def reset(self):
         self.trajectory_error = 0
@@ -133,5 +133,5 @@ class TrajectoryEnv:
         self.current_index = self.buffer_size+1
         for i in range(1, self.buffer_size): #opdater værdier for p1, p2, p3
             self.buffer[i][2] = self.ped(self.buffer[i], self.buffer[i+1], self.buffer[i-1])
-        initial_state, _ = self.get_state()
-        return initial_state
+        initial_state, indices = self.get_state()
+        return initial_state, indices
