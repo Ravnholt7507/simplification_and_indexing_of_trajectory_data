@@ -3,6 +3,7 @@ from DOTS.run_dots import dots
 from RLTS.run_rlts import rlts
 from compression_models import pmc_midrange
 import pandas as pd
+from squish import squish, SquishE
 import os
 import csv
 from pympler import asizeof
@@ -112,6 +113,8 @@ def get_trajectories(min_rows=0, max_rows=20000):
         df = pd.read_csv(file_path, names=["taxi_id", "datetime", "longitude", "latitude"])
         if len(df) > min_rows and len(df) < max_rows:
             dfs.append(df)
+        if len(dfs) > 41:
+            break
 
     return dfs
 
@@ -155,7 +158,7 @@ def eval_time(min_points, max_points, output_file='timing_results.csv'):
 
         for df in trajectories:
             start = time.perf_counter()
-            result = dots(df, 0.05, 1.5)
+            result = dots(df, 0.1, 1)
             end = time.perf_counter()
             dots_time = end - start
             time_DOTS += dots_time
@@ -172,6 +175,11 @@ def eval_time(min_points, max_points, output_file='timing_results.csv'):
             rlts_time = end - start
             time_RLTS += rlts_time
 
+            # start = time.perf_counter()
+            # squish(df, (len(df)/compression))
+            # end = time.perf_counter()
+            # squish_time = end - start
+
             # Write the times for each run to the CSV file
             writer.writerow([dots_time, rlts_time, max_points])
 
@@ -185,11 +193,14 @@ def compression_time_test():
     dots1, rlts1 = eval_time(500, 1000)
     dots1, rlts1 = eval_time(1000, 1500)
     dots1, rlts1 = eval_time(1500, 2000)
-    dots1, rlts1 = eval_time(2000, 2500)
-    dots1, rlts1 = eval_time(2500, 3000)
-    dots1, rlts1 = eval_time(3000, 3500)
-    dots1, rlts1 = eval_time(3500, 4000)
-    dots1, rlts1 = eval_time(4000, 4500)
-    dots1, rlts1 = eval_time(4500, 5000)
-#compression_time_test()
+    dots1, rlts1 = eval_time(2000, 3000)
+    dots1, rlts1 = eval_time(3000, 4000)
+    dots1, rlts1 = eval_time(4000, 5000)
+compression_time_test()
+
+
+def error_vs_ratio_test():
+    print("Running Error vs ratio test for RLTS and DOTS")ø
+    
+
 #eval_accuracy(100)
