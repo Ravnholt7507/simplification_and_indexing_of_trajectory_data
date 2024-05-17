@@ -31,6 +31,7 @@ class LayeredDAG:
 
     def add_trajectory_data(self, data_points, threshold, error_multiplier=1.5):
         """Adds trajectory data points to the DAG using the DOTS algorithm."""
+        total_error_testing = 0
         if not self.layers:
             # Always add the first point as the singleton node in the layered DAG
             self.add_initial_node(*data_points[0])
@@ -71,6 +72,7 @@ class LayeredDAG:
                 #print(f"Error_percentage between point {node_i.identifier} and {point_j[0]}: {error_percentage}%")
 
                 if error_percentage < min(lowest_error_percentage, threshold):
+                    total_error_testing += total_error
                     lowest_error_percentage = error_percentage
                     best_node = node_i
                     #print(f"Error percentage Updated: Point {node_i.identifier} added as best parent node for point {point_j[0]}")
@@ -97,16 +99,19 @@ class LayeredDAG:
                 # If the termination set now has all the nodes from the previous layer, break
                 break
 
-        return self.last_index
+        return total_error_testing
 
     def run_dots(self, data_points, threshold, error_multiplier=1.5):
         i = 0
+        total_error_testing = 0
         while i < len(data_points):
             #print(f"Attempting construction of layer ")
-            counter = self.add_trajectory_data(data_points, threshold, error_multiplier)
+            total_error_testing += self.add_trajectory_data(data_points, threshold, error_multiplier)
             if len(data_points) == self.last_index: # If no progress, break to prevent infinite loop
                 break
             i+1
+        print("total sed error for DOTS: ", total_error_testing)
+        return total_error_testing
 
     def decode_trajectory(self):
         """Decodes the trajectory from the last node with the highest identifier back to the initial node."""

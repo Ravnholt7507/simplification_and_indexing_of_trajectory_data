@@ -9,6 +9,7 @@ from grid_index import init_grid_index
 from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio, test_query_grid_index, calculate_range_query_accuracy, knn_no_indexing, print_full_size,knn_grid_index
 from ui import plot_mbrs, plot_query
 from RLTS.run_rlts import rlts
+from RLTS.train import train
 from queries import optimal_knn
 
 
@@ -21,13 +22,15 @@ def main():
     
     print(len(df))
 
-    rlts_df = rlts(df, 50)
+    
+    
+    rlts_df, _ = rlts(df, 818)
     rlts_rtree = init_rtree(rlts_df, mbr_points)
 
     squish_df = rlts(df, 50)
     squish_rtree = init_rtree(rlts_df, mbr_points)
 
-    dag_df = dots(df, 0.05, 1.5)
+    dag_df, _ = dots(df, 0.05, 1.5)
     dag_rtree = init_rtree(dag_df, mbr_points)
 
     final_df = pmc_midrange(df, 0.02)

@@ -12,7 +12,7 @@ def dots(df, error_bound, multiplier):
         data_points.append((index + 1, row["longitude"], row["latitude"], row["datetime"]))
 
     dag = LayeredDAG()
-    dag.run_dots(data_points, error_bound, multiplier)
+    total_error_testing = dag.run_dots(data_points, error_bound, multiplier)
     data_points = dag.decode_trajectory()
 
     dag_df = pd.DataFrame(data_points, columns=['taxi_id', 'longitude', 'latitude', 'datetime'])
@@ -20,4 +20,4 @@ def dots(df, error_bound, multiplier):
 
     end_time = time.time()
     print("DOTS time: ", end_time-start_time)
-    return dag_df
+    return dag_df, total_error_testing

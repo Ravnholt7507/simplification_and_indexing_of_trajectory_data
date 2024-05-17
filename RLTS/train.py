@@ -9,27 +9,24 @@ def train(env, policy_network, episodes, initial_epsilon=0.9, epsilon_decay=0.99
     epsilon = initial_epsilon
     for episode in range(episodes):
         print("EPISODE: ", episode)
-        state = env.reset()
+        state, indices = env.reset()
         done = False
         log_probs = []
         rewards = []
         total_reward = 0
 
         while not done:
-          #  start = time.time()
+#            print(state)
             state_tensor = torch.FloatTensor(state).unsqueeze(0)
+#            print(state_tensor)
             probs = policy_network(state_tensor)
             m = Categorical(probs)
-
-            # if random.random() < epsilon:
-            #     action = torch.tensor(random.choice(range(env.k)), dtype=torch.int64)
-            # else:
             action = m.sample()
+#            print(action)
 
             log_prob = m.log_prob(action)
-          #  end = time.time()
-          #  print("first loop in train time", (end-start))
             next_state, indices, reward, done = env.step(action.item())
+
             log_probs.append(log_prob)
             rewards.append(reward)
 
@@ -57,3 +54,4 @@ def train(env, policy_network, episodes, initial_epsilon=0.9, epsilon_decay=0.99
 
         if episode % 100 == 0:
             print(f"Episode {episode}, Total Reward: {sum(rewards)}, Loss: {policy_loss.item()}")
+        torch.save(policy_network.state_dict(), "online_model")

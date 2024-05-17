@@ -129,10 +129,10 @@ def eval_accuracy(test_count):
         df = get_random_trajectory()
         bbox = get_random_bbox(df["latitude"].min(), df["longitude"].min(), df["latitude"].max(), df["longitude"].max())
 
-        dag_df = dots(df, 0.05, 1.5)
+        dag_df, _ = dots(df, 0.05, 1.5)
         dag.append(calculate_range_query_accuracy(bbox, df, dag_df))
 
-        rlts_df = rlts(df, 0.05)
+        rlts_df, _ = rlts(df, 0.05)
         rlts_values.append(calculate_range_query_accuracy(bbox, df, rlts_df))
 
         pmc_df = pmc_midrange(df, 0.02)
@@ -158,7 +158,7 @@ def eval_time(min_points, max_points, output_file='timing_results.csv'):
 
         for df in trajectories:
             start = time.perf_counter()
-            result = dots(df, 0.1, 1)
+            result, _ = dots(df, 0.1, 1)
             end = time.perf_counter()
             dots_time = end - start
             time_DOTS += dots_time
@@ -189,18 +189,51 @@ def eval_time(min_points, max_points, output_file='timing_results.csv'):
 
 def compression_time_test():
     print("Running compression time test")
-    dots1, rlts1 = eval_time(100, 500)
-    dots1, rlts1 = eval_time(500, 1000)
-    dots1, rlts1 = eval_time(1000, 1500)
-    dots1, rlts1 = eval_time(1500, 2000)
-    dots1, rlts1 = eval_time(2000, 3000)
-    dots1, rlts1 = eval_time(3000, 4000)
-    dots1, rlts1 = eval_time(4000, 5000)
-compression_time_test()
+    eval_time(100, 500) #min and max points in the trajectory
+    eval_time(500, 1000)
+    eval_time(1000, 1500)
+    eval_time(1500, 2000)
+    eval_time(2000, 3000)
+    eval_time(3000, 4000)
+    eval_time(4000, 5000)
 
+
+def _error_vs_ratio_test(error_bound):
+    total_error_dots = 0
+    total_error_rlts = 0
+    i= 0
+    compression_rates = 0
+    trajectories = get_trajectories(1700, 2000)
+    trajectories = trajectories[:5]
+    #sample the overall error for 20 trajectories
+    for df in trajectories:
+        print(i)
+        dots_df, dots_error = dots(df, error_bound, 1.5)
+        total_error_dots += dots_error
+        rlts_df, rlts_error = rlts(df, len(dots_df))
+        total_error_rlts += rlts_error
+        compr_rate = len(df) / len(dots_df)
+        compression_rates += compr_rate
+        i += 1
+    #We find the average error over all trajectories
+    total_error_dots = (total_error_dots / len(trajectories))
+    total_error_rlts = (total_error_rlts / len(trajectories))
+    avg_compression_rate = compression_rates / len(trajectories)
+    return total_error_rlts, total_error_dots, avg_compression_rate
 
 def error_vs_ratio_test():
-    print("Running Error vs ratio test for RLTS and DOTS")ø
-    
+    print("Running Error vs ratio test for RLTS and DOTS")
+    rlts_errors = []
+    dots_errors = []
+    compr_rates = []
+    error_bounds = [0.1, 1, 2, 3, 4, 5]
+    for x in error_bounds:
+        total_error_rlts, total_error_dots, avg_comp_rate = _error_vs_ratio_test(x)
+        rlts_errors.append(total_error_rlts)
+        dots_errors.append(total_error_dots)
+        compr_rates.append(avg_comp_rate)
+    print(rlts_errors, dots_errors, compr_rates)
 
-#eval_accuracy(100)
+#error_vs_ratio_test()
+#compression_time_test()
+eval_accuracy(100)
