@@ -6,7 +6,7 @@ from pympler import asizeof
 from squish import SquishE, squish
 from r_tree import init_rtree
 from grid_index import init_grid_index
-from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio, test_query_grid_index, calculate_range_query_accuracy, knn_no_indexing, print_full_size,knn_grid_index
+from benchmarks import range_query_no_compression_no_indexing, test_query, compression_ratio, test_query_grid_index, calculate_range_query_accuracy, knn_no_indexing, print_full_size,knn_grid_index, calculate_knn_query_accuracy
 from ui import plot_mbrs, plot_query
 from RLTS.run_rlts import rlts
 from RLTS.train import train
@@ -26,9 +26,6 @@ def main():
     
     rlts_df, _ = rlts(df, 818)
     rlts_rtree = init_rtree(rlts_df, mbr_points)
-
-    squish_df = rlts(df, 50)
-    squish_rtree = init_rtree(rlts_df, mbr_points)
 
     dag_df, _ = dots(df, 0.05, 1.5)
     dag_rtree = init_rtree(dag_df, mbr_points)
@@ -62,9 +59,6 @@ def main():
     print("\nWITH RLTS AND WITH R-TREE INDEXING:")
     test_query(coordinates, rlts_rtree)
 
-    print("\nWITH SQUISH AND WITH R-TREE INDEXING:")
-    test_query(coordinates, squish_rtree)
-
     print("\nWITH RLTS AND WITHOUT R-TREE INDEXING:")
     range_query_no_compression_no_indexing(coordinates, rlts_df)
 
@@ -95,6 +89,11 @@ def main():
     print("range query accuracy with RLTS is: ", calculate_range_query_accuracy(coordinates, df, rlts_df))
     print("range query accuracy with DOTS is: ", calculate_range_query_accuracy(coordinates, df, dag_df))
     print("range query accuracy with PMC is: ", calculate_range_query_accuracy(coordinates, df, final_df))
+
+    print("KNN quey accuracy with RLTS is: ", calculate_knn_query_accuracy((39.96769, 116.40239), df, rlts_df, k=5))
+    # print("KNN quey accuracy with DOTS is: ", calculate_knn_query_accuracy((39.96769, 116.40239), df, dag_df, k=3))
+    # print("KNN quey accuracy with PMC is: ", calculate_knn_query_accuracy((39.96769, 116.40239), df, final_df, k=3))
+
 
     #Index memory usage
     #print_full_size(grid_index, 'grid_index')

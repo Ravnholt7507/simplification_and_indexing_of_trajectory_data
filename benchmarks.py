@@ -1,9 +1,12 @@
-from queries import range_query, grid_index_range_query, within, knn_query_grid_index
+from queries import range_query, grid_index_range_query, within, knn_query_grid_index, optimal_knn
 from DOTS.run_dots import dots
 from RLTS.run_rlts import rlts
 from compression_models import pmc_midrange
+import numpy as np
 import pandas as pd
+from r_tree import init_rtree
 from squish import squish, SquishE
+from grid_index import init_grid_index
 import os
 import csv
 from pympler import asizeof
@@ -37,10 +40,10 @@ def range_query_no_compression_no_indexing(coordinates, points):
     print("Query took ", end - start, " seconds to execute.\n")
     return results
 
-def knn_no_indexing(poi, df):
+def knn_no_indexing(point, df):
     closest_point = df.iloc[0]
     for index, row in df.iterrows():
-        if haversine((row["latitude"], row["longitude"]), poi) < haversine((closest_point["latitude"], closest_point["longitude"]), poi):
+        if haversine((row["latitude"], row["longitude"]), point) < haversine((closest_point["latitude"], closest_point["longitude"]), point):
             closest_point = row
     return closest_point
 
@@ -132,7 +135,7 @@ def eval_accuracy(test_count):
         dag_df, _ = dots(df, 0.05, 1.5)
         dag.append(calculate_range_query_accuracy(bbox, df, dag_df))
 
-        rlts_df, _ = rlts(df, 0.05)
+        rlts_df, _ = rlts(df, len(dag_df))
         rlts_values.append(calculate_range_query_accuracy(bbox, df, rlts_df))
 
         pmc_df = pmc_midrange(df, 0.02)
@@ -141,6 +144,8 @@ def eval_accuracy(test_count):
     dict = {"rlts": rlts_values, "pmc": pmc, "dag": dag}
     df = pd.DataFrame(dict)
     df.to_csv("eval_accuracy.csv")
+
+
 
 
 def eval_time(min_points, max_points, output_file='timing_results.csv'):
@@ -203,7 +208,7 @@ def _error_vs_ratio_test(error_bound):
     total_error_rlts = 0
     i= 0
     compression_rates = 0
-    trajectories = get_trajectories(1700, 2000)
+    trajectories = get_trajectories(1800, 2000)
     trajectories = trajectories[:5]
     #sample the overall error for 20 trajectories
     for df in trajectories:
@@ -234,6 +239,125 @@ def error_vs_ratio_test():
         compr_rates.append(avg_comp_rate)
     print(rlts_errors, dots_errors, compr_rates)
 
+
+def knn_no_indexing_haversine(point, df, k):
+    min_heap = []
+    for index, row in df.iterrows():
+        heapq.heappush(min_heap, haversine((row["latitude"], row["longitude"]), point))
+
+    k_smallest_distances = heapq.nsmallest(k, min_heap)
+    sum_k_smallest = sum(k_smallest_distances)
+    return sum_k_smallest
+
+def calculate_knn_query_accuracy(point, original_df, simplified_df, k=1):
+
+    print(point)
+
+    o_result = knn_no_indexing_haversine(point, original_df, k)
+    s_result = knn_no_indexing_haversine(point, simplified_df, k)
+    if s_result == 0 and o_result == 0:
+        accuracy = 1 
+    else: 
+        if s_result != 0:
+            accuracy = o_result / s_result
+        else:
+            accuracy = 0
+
+    print(accuracy)
+    return accuracy
+
+def build_index_time(index_type):
+    sizes = [100, 1000, 5000, 10000, 20000]
+    build_times = []
+    trajectories = get_trajectories(154600, 154700)
+    trajectory = trajectories[0]
+    for size in sizes:
+        traj = trajectory[:size]
+        start_time = time.perf_counter()
+        if index_type == 'grid':
+            index = init_grid_index(traj)
+        elif index_type == 'rtree':
+            index = init_rtree(traj, mbr_points=10)
+        end_time = time.perf_counter()
+        build_times.append((end_time-start_time))
+    print(build_times)
+
+#build_index_time('rtree')
+
+def find_longest_dataframe():
+    folder_path = "release/taxi_log_2008_by_id"
+    files = [os.path.join(folder_path, file) for file in os.listdir(folder_path)]
+    dfs = []
+    for file_path in files:
+        df = pd.read_csv(file_path, names=["taxi_id", "datetime", "longitude", "latitude"])
+        dfs.append(df)
+    # Find the longest dataframe
+    longest_df = max(dfs, key=lambda df: len(df))
+
+    print("The longest dataframe is:")
+    print(len(longest_df))
+    print(longest_df)
+    longest_df = longest_df.drop_duplicates(subset=['latitude', 'longitude'], keep='first')
+    print(len(longest_df))
+
+
+#find_longest_dataframe()
+
+
+def index_runtime_test(index_type, num_tests=100, random_seed=42):
+    random.seed(random_seed)  # Set the random seed for reproducibility
+    sizes = [10000, 50000, 100000, 150000]
+    knn_times = []
+    range_times = []
+    trajectories = get_trajectories(154600, 154700)
+    trajectory = trajectories[0]
+    trajectory = trajectory.drop_duplicates(subset=['latitude', 'longitude'], keep='first')
+    trajectory = trajectory[trajectory['latitude'].astype(str).str.startswith('39') & trajectory['longitude'].astype(str).str.startswith('116')]
+
+    for size in sizes:
+        traj = trajectory[:size]
+        lat_min, lon_min, lat_max, lon_max = traj["latitude"].min(), traj["longitude"].min(), traj["latitude"].max(), traj["longitude"].max()
+
+        range_test_times = []
+        knn_test_times = []
+        for _ in range(num_tests):  # Number of random tests
+            range_query_bbox = get_random_bbox(lat_min, lon_min, lat_max, lon_max)
+            knn_point = tuple(traj.sample(n=1)[['latitude', 'longitude']].iloc[0])
+
+            if index_type == 'grid':
+                grid_index = init_grid_index(traj)
+                start_time = time.perf_counter()
+                grid_index_range_query(range_query_bbox, grid_index)
+                end_time = time.perf_counter()
+                range_test_times.append((end_time - start_time))
+
+                start_time = time.perf_counter()
+                knn_query_grid_index(grid_index, knn_point, 1)
+                end_time = time.perf_counter()
+                knn_test_times.append((end_time - start_time))
+
+            elif index_type == 'rtree':
+                rtree_index = init_rtree(traj, mbr_points=10)
+                start_time = time.perf_counter()
+                range_query(range_query_bbox, rtree_index)
+                end_time = time.perf_counter()
+                range_test_times.append((end_time - start_time))
+
+                start_time = time.perf_counter()
+                optimal_knn(knn_point, rtree_index)
+                end_time = time.perf_counter()
+                knn_test_times.append((end_time - start_time))
+
+        range_times.append(np.mean(range_test_times))
+        knn_times.append(np.mean(knn_test_times))
+
+    print("Range query times: ", range_times)
+    print("kNN query times: ", knn_times)
+
+
+
+index_runtime_test('rtree')
 #error_vs_ratio_test()
 #compression_time_test()
-eval_accuracy(100)
+#eval_accuracy(10)
+
