@@ -62,11 +62,28 @@ class Rtree:
     def __init__(self, max_children=5):
         self.root = Node(mbr=None)
         self.max_children = max_children
+    
+    def remove(self, point):
+        self._remove(self.root, point)
+
+    def _remove(self, node, point):
+        if node.is_leaf:
+            for child in node.children:
+                if self.time_within(child, point):
+                    for index, element in child.mbr["points"].iterrows():
+                        if element["datetime"] == point["datetime"]:
+                            child.mbr["points"] = child.mbr["points"].drop(index)
+                            child.mbr = create_mbr(child.mbr["points"])
+        else:
+            for child in node.children:
+                if self.time_within(child, point):
+                    self._remove(child, point)
+
 
     def insert(self, mbr):
-        self.insert_mbr(mbr, self.root)
+        self._insert(mbr, self.root)
 
-    def insert_mbr(self, mbr, node):
+    def _insert(self, mbr, node):
         if node.is_leaf:
             if len(node.children) < self.max_children:
                 node.children.append(Node(mbr=mbr))
@@ -76,20 +93,20 @@ class Rtree:
                     node.mbr = self.expand_mbr(node.mbr, mbr)
             else:
                 self.split_node(node)
-                self.insert_mbr(mbr, node)
+                self._insert(mbr, node)
         else:
             for child in node.children:
                 if len(child.children) < self.max_children:
-                    self.insert_mbr(mbr, child)
+                    self._insert(mbr, child)
                     node.mbr = self.expand_mbr(node.mbr, mbr)
                     return
             if len(node.children) < self.max_children:
                 node.children.append(Node(mbr=None))
                 node.mbr = self.expand_mbr(node.mbr, mbr)
-                self.insert_mbr(mbr, node.children[-1])
+                self._insert(mbr, node.children[-1])
             else:
                 self.split_node(node)
-                self.insert_mbr(mbr, node)
+                self._insert(mbr, node)
 
     @staticmethod
     def split_node(node):
@@ -99,7 +116,7 @@ class Rtree:
         for element in node.children:
             child_1.children.append(element)
         node.children = [child_1]
-
+    
     @staticmethod
     def expand_mbr(mbr1, mbr2):
         x_min1, y_min1, x_max1, y_max1 = mbr1["min"][0], mbr1["min"][1], mbr1["max"][0], mbr1["max"][1]
@@ -118,3 +135,9 @@ class Rtree:
             mbr1["end"] = mbr2["end"]
 
         return mbr1
+
+    @staticmethod
+    def time_within(node, point):
+        if datetime.strptime(node.mbr["start"], '%Y-%m-%d %H:%M:%S') <= datetime.strptime(point["datetime"], '%Y-%m-%d %H:%M:%S') and datetime.strptime(node.mbr["end"], '%Y-%m-%d %H:%M:%S') >= datetime.strptime(point["datetime"], '%Y-%m-%d %H:%M:%S'):
+            return True
+        return False
