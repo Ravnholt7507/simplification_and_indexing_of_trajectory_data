@@ -6,10 +6,10 @@ from RLTS.train import train
 import time
 import matplotlib.pyplot as plt
 
-def rlts(df, size, mode="online"):
+def rlts(df, size, spatial_index = None, mode="online"):
     start_time = time.time()
     #env = BatchMode_TrajectoryEnv(df)
-    env = TrajectoryEnv(df, size)
+    env = TrajectoryEnv(df, size, spatial_index)
     policy_network = PolicyNetwork(input_size=env.k, hidden_size=20, output_size=env.k)
     #train(env, policy_network, 100)
     policy_network.state_dict(torch.load("RLTS/models/online_model"))
@@ -33,13 +33,9 @@ def rlts(df, size, mode="online"):
     end_time = time.time()
     total_error = env.calculate_overall_error()
     print("RLTS time: ", end_time - start_time)
+
+    # Get and print memory statistics
+    memory_stats = env.get_memory_statistics()
+    print("Memory Statistics:", memory_stats)
+
     return complete_df, total_error
-
-
-
-
-
-            # if env.exceeds_threshold(indices[action], threshold):
-            #     print("threshold met")
-            #     done = True
-            #     break

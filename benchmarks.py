@@ -76,10 +76,6 @@ def calculate_range_query_accuracy(bbox, original_df, simplified_df):
 
     return accuracy
 
-def print_full_size(grid_index, label):
-    print(f"Full memory size of {label}: {asizeof.asizeof(grid_index)} bytes")
-
-# Function to print full memory usage of an object
 def print_full_size(obj, label):
     print(f"Full memory size of {label}: {asizeof.asizeof(obj)} bytes")
 
@@ -356,7 +352,7 @@ def index_runtime_test(index_type, num_tests=100, random_seed=42):
 
 
 
-index_runtime_test('rtree')
+#index_runtime_test('grid')
 #error_vs_ratio_test()
 #compression_time_test()
 #eval_accuracy(10)
